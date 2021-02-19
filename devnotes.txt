@@ -1,0 +1,33 @@
+NODE/TS SETUP
+1. npm init: index.js
+npm i --save-dev @types/node typescript
+
+2. mot so nguoi thich dung scripts: "start": "ts-node src/index.ts"
+npm i --save-dev ts-node
+npx tsconfig.json (Ben Awad create this) -> choose node
+
+3. index.ts: console.log('hello')
+npm run start
+
+4. but this is better:
+"scripts": {
+    "start": "node dist/index",
+    "startts": "ts-node src/index.ts",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+
+5. npm i --save-dev nodemon
+"scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon dist/index.js",
+    "startts": "ts-node src/index.ts",
+    "devts": "nodemon --exec ts-node src/index.ts",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+
+MICROORM SETUP:
+npm i @mikro-orm/cli @mikro-orm/core @mikro-orm/migrations @mikro-orm/postgresql pg
+Nho cai postgresql (google)
+cli: createdb lireddit or run pgAdmin in windows to do it in GUI
