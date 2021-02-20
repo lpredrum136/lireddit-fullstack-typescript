@@ -47,3 +47,4 @@ neu gap loi migrations thi delete folder migrations trong dist di va lam lai tu 
 APOLLO SERVER EXPRESS SETUP
 npm i apollo-server-express express graphql type-graphql (type-graphql is for easier TS use in GraphQL)
 npm i @types/express --save-dev
+npm i reflect-metadata
