@@ -31,3 +31,19 @@ MICROORM SETUP:
 npm i @mikro-orm/cli @mikro-orm/core @mikro-orm/migrations @mikro-orm/postgresql pg
 Nho cai postgresql (google)
 cli: createdb lireddit or run pgAdmin in windows to do it in GUI
+Chinh connection trong index.ts
+add them vao package.json
+"mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
+  }
+add them file mikro-orm.config.ts, them connection, them migrations
+CLI: npx mikro-orm migration:create
+neu gap loi migrations thi delete folder migrations trong dist di va lam lai tu dau
+
+APOLLO SERVER EXPRESS SETUP
+npm i apollo-server-express express graphql type-graphql (type-graphql is for easier TS use in GraphQL)
+npm i @types/express --save-dev
