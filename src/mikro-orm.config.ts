@@ -2,6 +2,7 @@ import { __prod__ } from './constants'
 import { Post } from './entities/Post'
 import { MikroORM } from '@mikro-orm/core'
 import path from 'path'
+import { User } from './entities/User'
 
 require('dotenv').config({ debug: !__prod__ })
 
@@ -10,7 +11,7 @@ const mikroConfig = {
     path: path.join(__dirname, 'migrations'), // path to the folder with migrations
     pattern: /^[\w-]+\d+\.[tj]s$/ // regex pattern for the migration files, both .js and .ts file
   },
-  entities: [Post], // db tables
+  entities: [Post, User], // db tables
   // clientUrl: 'postgres://localhost',
   dbName: 'lireddit',
   type: 'postgresql',

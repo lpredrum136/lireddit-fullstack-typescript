@@ -4,22 +4,22 @@ import { Arg, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
 
 @Resolver()
 export class PostResolver {
-  @Query(returns => [Post])
+  @Query(_returns => [Post])
   posts(@Ctx() ctx: DbContext): Promise<Post[]> {
     // explicitly declare return type here so if you "return 5" it will yell error
     // return 5
     return ctx.em.find(Post, {})
   }
 
-  @Query(returns => Post, { nullable: true })
+  @Query(_returns => Post, { nullable: true })
   post(
-    @Arg('id', type => ID) id: number, // 'id' right after Arg is what we'll write in GraphQL playground, i.e. real GraphQL language
+    @Arg('id', _type => ID) id: number, // 'id' right after Arg is what we'll write in GraphQL playground, i.e. real GraphQL language
     @Ctx() { em }: DbContext
   ): Promise<Post | null> {
     return em.findOne(Post, { id })
   }
 
-  @Mutation(returns => Post)
+  @Mutation(_returns => Post)
   async createPost(
     @Arg('title') title: string,
     @Ctx() { em }: DbContext
@@ -29,10 +29,10 @@ export class PostResolver {
     return post
   }
 
-  @Mutation(returns => Post, { nullable: true })
+  @Mutation(_returns => Post, { nullable: true })
   async updatePost(
     @Ctx() { em }: DbContext,
-    @Arg('id', type => ID) id: number,
+    @Arg('id', _type => ID) id: number,
     @Arg('title', { nullable: true }) title?: string
   ): Promise<Post | null> {
     const post = await em.findOne(Post, { id })
@@ -47,10 +47,10 @@ export class PostResolver {
     return post
   }
 
-  @Mutation(returns => Boolean)
+  @Mutation(_returns => Boolean)
   async deletePost(
     @Ctx() { em }: DbContext,
-    @Arg('id', type => ID) id: number
+    @Arg('id', _type => ID) id: number
   ): Promise<boolean> {
     await em.nativeDelete(Post, { id })
     return true
