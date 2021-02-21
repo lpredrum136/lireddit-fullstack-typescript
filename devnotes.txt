@@ -42,9 +42,13 @@ add them vao package.json
   }
 add them file mikro-orm.config.ts, them connection, them migrations
 CLI: npx mikro-orm migration:create
-neu gap loi migrations thi delete folder migrations trong dist di va lam lai tu dau
+neu gap loi migrations thi delete ca folder dist di va lam lai tu dau
 
 APOLLO SERVER EXPRESS SETUP
 npm i apollo-server-express express graphql type-graphql (type-graphql is for easier TS use in GraphQL)
 npm i @types/express --save-dev
 npm i reflect-metadata
+
+REGISTER RESOLVER
+Nhu vay tu nay ve sau workflow: Tao entity, dua vao mikroorm config, chay lenh mikroorm migration, migrator.up() se tu dong day migration len
+npm i argon2

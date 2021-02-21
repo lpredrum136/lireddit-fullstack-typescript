@@ -4,7 +4,7 @@ import { Arg, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
 
 @Resolver()
 export class PostResolver {
-  @Query(_returns => [Post])
+  @Query(_returns => [Post]) // _ is to bypass unused variable error
   posts(@Ctx() ctx: DbContext): Promise<Post[]> {
     // explicitly declare return type here so if you "return 5" it will yell error
     // return 5
