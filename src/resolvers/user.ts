@@ -3,7 +3,6 @@ import {
   Arg,
   Ctx,
   Field,
-  ID,
   InputType,
   Mutation,
   ObjectType,
@@ -43,12 +42,52 @@ export class UserResolver {
     @Arg('registerInput') registerInput: AuthInput,
     @Ctx() { em }: DbContext
   ): Promise<UserMutationResponse> {
+    if (registerInput.username.length <= 2) {
+      return {
+        code: 400,
+        success: false,
+        message: 'Invalid username',
+        errors: [
+          {
+            field: 'username',
+            message: 'Length must be greater than 2'
+          }
+        ]
+      }
+    }
+
+    if (registerInput.password.length <= 3) {
+      return {
+        code: 400,
+        success: false,
+        message: 'Invalid password',
+        errors: [
+          {
+            field: 'password',
+            message: 'Length must be greater than 3'
+          }
+        ]
+      }
+    }
+
     const hashedPassword = await argon2.hash(registerInput.password)
     const newUser = em.create(User, {
       username: registerInput.username,
       password: hashedPassword
     })
-    await em.persistAndFlush(newUser)
+
+    try {
+      await em.persistAndFlush(newUser)
+    } catch (error) {
+      if (error.code === '23505' || error.detail.includes('already exists'))
+        // duplicate username
+        return {
+          code: 400,
+          success: false,
+          message: 'Duplicate username',
+          errors: [{ field: 'username', message: 'Username already exists' }]
+        }
+    }
 
     return {
       code: 200,
@@ -103,5 +142,6 @@ export class UserResolver {
       success: true,
       message: 'Logged in user successfully',
       user
+    }
   }
 }
