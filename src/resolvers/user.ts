@@ -6,13 +6,16 @@ import {
   ID,
   InputType,
   Mutation,
+  ObjectType,
   Resolver
 } from 'type-graphql'
 import { User } from '../entities/User'
 import argon2 from 'argon2'
+import { IMutationResponse } from '../entities/MutationResponse'
+import { FieldError } from '../entities/FieldError'
 
 @InputType()
-class RegisterInput {
+class AuthInput {
   @Field()
   username: string
 
@@ -20,47 +23,85 @@ class RegisterInput {
   password: string
 }
 
+@ObjectType({ implements: IMutationResponse })
+class UserMutationResponse implements IMutationResponse {
+  code: number
+  success: boolean
+  message?: string
+
+  @Field({ nullable: true })
+  user?: User
+
+  @Field(_type => [FieldError], { nullable: true })
+  errors?: FieldError[]
+}
+
 @Resolver()
 export class UserResolver {
-  @Mutation(_returns => User)
+  @Mutation(_returns => UserMutationResponse)
   async register(
-    @Arg('registerInput') registerInput: RegisterInput,
+    @Arg('registerInput') registerInput: AuthInput,
     @Ctx() { em }: DbContext
-  ): Promise<User> {
+  ): Promise<UserMutationResponse> {
     const hashedPassword = await argon2.hash(registerInput.password)
     const newUser = em.create(User, {
       username: registerInput.username,
       password: hashedPassword
     })
-    const result = await em.persistAndFlush(newUser)
+    await em.persistAndFlush(newUser)
 
-    return newUser // newUser here actually contains password field but since in User.ts entity, we didn't mark it as a GraphQL field, it doesn't get returned to GraphQL
+    return {
+      code: 200,
+      success: true,
+      message: 'Created user successfully',
+      user: newUser
+    } // newUser here actually contains password field but since in User.ts entity, we didn't mark it as a GraphQL field, it doesn't get returned to GraphQL
   }
 
-  // @Mutation(_returns => Post, { nullable: true })
-  // async updatePost(
-  //   @Ctx() { em }: DbContext,
-  //   @Arg('id', _type => ID) id: number,
-  //   @Arg('title', { nullable: true }) title?: string
-  // ): Promise<Post | null> {
-  //   const post = await em.findOne(Post, { id })
-  //   if (!post) return null
+  @Mutation(_returns => UserMutationResponse)
+  async login(
+    @Arg('loginInput') loginInput: AuthInput,
+    @Ctx() { em }: DbContext
+  ): Promise<UserMutationResponse> {
+    const user = await em.findOne(User, { username: loginInput.username })
+    if (!user) {
+      return {
+        code: 400,
+        success: false,
+        message: 'Cannot find user',
+        errors: [
+          {
+            field: 'username',
+            message: 'Username does not exist'
+          }
+        ]
+      }
+    }
 
-  //   if (typeof title !== 'undefined') {
-  //     // they actually give a new title
-  //     post.title = title
-  //     await em.persistAndFlush(post)
-  //   }
+    // User found
+    const passwordValid = await argon2.verify(
+      user.password,
+      loginInput.password
+    )
+    if (!passwordValid) {
+      return {
+        code: 400,
+        success: false,
+        message: 'Wrong password. Try again',
+        errors: [
+          {
+            field: 'username',
+            message: 'Incorrect password'
+          }
+        ]
+      }
+    }
 
-  //   return post
-  // }
-
-  // @Mutation(_returns => Boolean)
-  // async deletePost(
-  //   @Ctx() { em }: DbContext,
-  //   @Arg('id', _type => ID) id: number
-  // ): Promise<boolean> {
-  //   await em.nativeDelete(Post, { id })
-  //   return true
-  // }
+    // User found and password correct
+    return {
+      code: 200,
+      success: true,
+      message: 'Logged in user successfully',
+      user
+  }
 }
