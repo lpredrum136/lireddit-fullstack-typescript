@@ -155,7 +155,8 @@ export class UserResolver {
 
     // Login successful here is the thing I want to store in session
     // and all requests will have this req.session.userId so that I know what user is requesting
-    req.session.userId = user.id // you can stick more data here if you want to
+    // see more in devnotes.txt
+    req.session.userId = user.id // you can stick more data here if you want to, anything that doesn't change and unique to a user
 
     // User found and password correct
     return {

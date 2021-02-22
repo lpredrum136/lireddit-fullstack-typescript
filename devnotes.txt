@@ -105,3 +105,9 @@ get the session id (_id in mongoDB)
 _id => se ra {userId: 1}
 
 6. {userId: 1} is attached back to req to go forward, under the form of req.session = {..., userId: 1}
+
+NEXT JS & CHAKRA
+Go up one folder
+npx create-next-app --example with-chakra-ui lireddit-client
+
+but I like to live dangerously, so I installed it to same folder lol
