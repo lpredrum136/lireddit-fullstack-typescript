@@ -45,10 +45,63 @@ CLI: npx mikro-orm migration:create
 neu gap loi migrations thi delete ca folder dist di va lam lai tu dau
 
 APOLLO SERVER EXPRESS SETUP
-npm i apollo-server-express express graphql type-graphql (type-graphql is for easier TS use in GraphQL)
+npm i apollo-server-express express graphql type-graphql class-validator (type-graphql is for easier TS use in GraphQL) (type-graphql is dependent on class-validator)
 npm i @types/express --save-dev
 npm i reflect-metadata
 
 REGISTER RESOLVER
 Nhu vay tu nay ve sau workflow: Tao entity, dua vao mikroorm config, chay lenh mikroorm migration, migrator.up() se tu dong day migration len
 npm i argon2
+
+SESSION AUTHENTICATION
+install Redis, tai thu muc goc: https://auth0.com/blog/introduction-to-redis-install-cli-commands-and-data-types/
+- curl -O http://download.redis.io/redis-stable.tar.gz
+- tar xvzf redis-stable.tar.gz
+- cd redis-stable
+- make
+
+- make test 
+if "you need tcl":
+- download tcl at
+- https://www.tcl.tk/software/tcltk/download84.html
+cd to where you download tcl
+tar xvzf tcl8.6.11-src.tar.gz
+
+cd tcl8.6.11/
+cd unix/
+./configure
+make
+make install
+ 
+
+npm i redis connect-redis express-session
+npm i --save-dev @types/redis @types/connect-redis @types/express-session
+
+Nhung ma install redis kho vl nen dang tim cach khac
+
+npm i connect-mongo
+
+sau khi tao cluster tai mongo cloud thi da chay duoc roi
+
+mo GraphQL playground => settings -> request.credentials: include
+
+HOW SESSION AND COOKIE WORKS
+
+req.session.userID = user.id
+se tao ra 1 object kieu {userId: 1}
+
+1. express-session va connect-mongo se tao ban luu trong mongoDB, co the kiem tra trong mongoDB
+_id: asfasdfdshgdkgsj, session: {cookie: {.....}, userId: 1}
+
+2. express-session will store a cookie in client browser lireddit-cookie: someRANDOMStringabc, duoc encrypt voi secret
+
+3. when user makes request
+someRANDOMStringabc is sent to server 
+
+4. Server intercepts the request, decrypt the cookie
+get the session id (_id in mongoDB)
+
+5. make a request to mongoDB.
+_id => se ra {userId: 1}
+
+6. {userId: 1} is attached back to req to go forward, under the form of req.session = {..., userId: 1}

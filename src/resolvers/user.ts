@@ -6,6 +6,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver
 } from 'type-graphql'
 import { User } from '../entities/User'
@@ -37,10 +38,21 @@ class UserMutationResponse implements IMutationResponse {
 
 @Resolver()
 export class UserResolver {
+  // Me query
+  @Query(_returns => User, { nullable: true })
+  async me(@Ctx() { em, req }: DbContext): Promise<User | null> {
+    // You are not logged in
+    console.log(req.session)
+    if (!req.session.userId) return null
+
+    const user = await em.findOne(User, { id: req.session.userId })
+    return user
+  }
+
   @Mutation(_returns => UserMutationResponse)
   async register(
     @Arg('registerInput') registerInput: AuthInput,
-    @Ctx() { em }: DbContext
+    @Ctx() { em, req }: DbContext
   ): Promise<UserMutationResponse> {
     if (registerInput.username.length <= 2) {
       return {
@@ -89,6 +101,11 @@ export class UserResolver {
         }
     }
 
+    // store user id session
+    // this will set a cookie on the user browser
+    // keep them logged in
+    req.session.userId = newUser.id
+
     return {
       code: 200,
       success: true,
@@ -100,7 +117,7 @@ export class UserResolver {
   @Mutation(_returns => UserMutationResponse)
   async login(
     @Arg('loginInput') loginInput: AuthInput,
-    @Ctx() { em }: DbContext
+    @Ctx() { em, req }: DbContext
   ): Promise<UserMutationResponse> {
     const user = await em.findOne(User, { username: loginInput.username })
     if (!user) {
@@ -135,6 +152,10 @@ export class UserResolver {
         ]
       }
     }
+
+    // Login successful here is the thing I want to store in session
+    // and all requests will have this req.session.userId so that I know what user is requesting
+    req.session.userId = user.id // you can stick more data here if you want to
 
     // User found and password correct
     return {
