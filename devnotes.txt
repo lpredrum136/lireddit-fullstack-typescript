@@ -108,6 +108,19 @@ _id => se ra {userId: 1}
 
 NEXT JS & CHAKRA
 Go up one folder
-npx create-next-app --example with-chakra-ui lireddit-client
+npx create-next-app --example with-chakra-ui lireddit-client (thuc ra trong examples co cai co san chakra with typescript)
 
 but I like to live dangerously, so I installed it to same folder lol
+
+cd lireddit-client
+npm run dev
+
+change from .js to .tsx
+change index.tsx: hello world
+keep _app.tsx intact
+theme thanh tsx
+delete het trong src/components di
+
+ctrl c tat client di, Next se hoi setup TS.
+neu k hoi thi chac la cu tu dong di cai thoi:
+npm i --save-dev typescript @types/node @types/react @types/react-dom
