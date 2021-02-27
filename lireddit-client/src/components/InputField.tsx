@@ -11,16 +11,21 @@ type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   name: string
   label: string
   placeholder: string
+  type: string
+  size?: string // if we dont' have this, Chakra Input will yell, I think this is to override size default inside INputHTMLAttributes<HTMLInputElement>
 }
 
-const InputField = (props: InputFieldProps) => {
+// or you can delete size?: string above, and add {label, size, ...props} here, which will get size from InputHTMLAttributes<HTMLInputElement> I guess
+// or cach 3: {label, size: _, ...props} as Ben does, to rename unused variable to _
+const InputField = ({ label, ...props }: InputFieldProps) => {
   const [field, { error }] = useField(props)
 
   return (
     <div>
       <FormControl isInvalid={!!error}>
-        <FormLabel htmlFor={field.name}>{props.label}</FormLabel>
-        <Input {...field} id={field.name} placeholder={props.placeholder} />
+        {/* field.name here can be props.name, but using field.name ensures that Formik working as expected */}
+        <FormLabel htmlFor={field.name}>{label}</FormLabel>
+        <Input {...field} {...props} id={field.name} />
         {error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
       </FormControl>
     </div>
