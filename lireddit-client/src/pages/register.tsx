@@ -6,6 +6,7 @@ import {
   FormErrorMessage
 } from '@chakra-ui/react'
 import Wrapper from '../components/Wrapper'
+import InputField from '../components/InputField'
 
 const Register = () => {
   return (
@@ -16,16 +17,17 @@ const Register = () => {
       >
         {({ values, handleChange }) => (
           <Form>
-            <FormControl>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <Input
-                id="username"
-                placeholder="name"
-                value={values.username}
-                onChange={handleChange}
-              />
-              {/* <FormErrorMessage>{form.errors.name}</FormErrorMessage> */}
-            </FormControl>
+            <InputField
+              name="username"
+              placeholder="username"
+              label="username"
+            />
+            <InputField
+              name="password"
+              placeholder="password"
+              label="password"
+              type="password"
+            />
           </Form>
         )}
       </Formik>

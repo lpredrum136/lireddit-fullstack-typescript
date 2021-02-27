@@ -124,3 +124,5 @@ delete het trong src/components di
 ctrl c tat client di, Next se hoi setup TS.
 neu k hoi thi chac la cu tu dong di cai thoi:
 npm i --save-dev typescript @types/node @types/react @types/react-dom
+
+can cai them npm i formik
