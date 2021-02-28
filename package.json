@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon dist/index.js",
+    "server": "nodemon dist/index.js",
     "startts": "ts-node src/index.ts",
-    "devts": "nodemon --exec ts-node src/index.ts",
+    "serverts": "nodemon --exec ts-node src/index.ts",
     "watch": "tsc -w",
     "create:migration": "mikro-orm migration:create",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/express-session": "^1.17.3",
     "@types/node": "^14.14.30",
@@ -31,6 +32,7 @@
     "argon2": "^0.27.1",
     "class-validator": "^0.13.1",
     "connect-mongo": "^3.2.0",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",

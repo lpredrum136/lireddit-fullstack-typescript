@@ -45,7 +45,8 @@ CLI: npx mikro-orm migration:create
 neu gap loi migrations thi delete ca folder dist di va lam lai tu dau
 
 APOLLO SERVER EXPRESS SETUP
-npm i apollo-server-express express graphql type-graphql class-validator (type-graphql is for easier TS use in GraphQL) (type-graphql is dependent on class-validator)
+npm i apollo-server-express express graphql type-graphql class-validator (type-graphql is for easier TS use in GraphQL) 
+(type-graphql is dependent on class-validator. If you want to suppress tsc error, add "skipLibCheck": true in tsconfig.json)
 npm i @types/express --save-dev
 npm i reflect-metadata
 
@@ -84,6 +85,10 @@ npm i connect-mongo
 sau khi tao cluster tai mongo cloud thi da chay duoc roi
 
 mo GraphQL playground => settings -> request.credentials: include
+
+neu gap loi Namespace 'global.Express' has no exported member 'SessionData' trong tsc thi:
+reverted back to this version to fix the issue: "@types/express-session": "1.17.0",
+https://stackoverflow.com/questions/64845125/namespace-express-has-no-exported-member-sessiondata
 
 HOW SESSION AND COOKIE WORKS
 
@@ -126,3 +131,31 @@ neu k hoi thi chac la cu tu dong di cai thoi:
 npm i --save-dev typescript @types/node @types/react @types/react-dom
 
 can cai them npm i formik
+
+URQL BASICS
+I don't like URQL so gonna use Apollo Client
+cd lireddit-client
+npm install @apollo/client graphql
+
+Tam thoi chua dung duoc TS len Apollo Client, dang nghien cuu apollo codegen
+
+Neu ta gui 
+const client = new ApolloClient({
+  uri: 'https://api.example.com',
+  cache: new InMemoryCache(),
+  // Enable sending cookies over cross-origin requests
+  credentials: 'include'
+});
+
+de bat client send credentials nhu luc con o playground thi se gap loi cors
+
+Co the sua bang cach npm i cors
+va npm i @types/cors --save-dev
+
+const app = express()
+  app.use(
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true
+    })
+  )

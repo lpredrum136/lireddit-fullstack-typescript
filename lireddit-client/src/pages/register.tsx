@@ -4,13 +4,45 @@ import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
 
+import { register } from '../graphql-client/mutations'
+import { useMutation } from '@apollo/client'
+
 const Register = () => {
+  // Form
+  const initialValues = {
+    username: '',
+    password: ''
+  }
+
+  const onRegisterSubmit = values => {
+    return registerUser({ variables: { registerInput: values } })
+  }
+
+  // GraphQL operations
+  interface UserMutationResponse {
+    code: number
+    success: boolean
+    message: string
+    user: string
+    errors: string
+  }
+  interface INewUser {
+    username: string
+    password: string
+  }
+
+  const [registerUser, { error, data }] = useMutation<
+    { register: UserMutationResponse },
+    { registerInput: INewUser }
+  >(register)
+
   return (
     <Wrapper variant="small">
-      <Formik
-        initialValues={{ username: '', password: '' }}
-        onSubmit={values => console.log(values)}
-      >
+      {error && <p>Failed to register. Server error.</p>}
+      {data && data.register.success ? (
+        <p>Registered successfully {JSON.stringify(data)}</p>
+      ) : null}
+      <Formik initialValues={initialValues} onSubmit={onRegisterSubmit}>
         {({ isSubmitting }) => (
           <Form>
             <InputField

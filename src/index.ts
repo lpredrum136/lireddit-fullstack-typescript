@@ -11,6 +11,7 @@ import { PostResolver } from './resolvers/post'
 import { UserResolver } from './resolvers/user'
 
 import session from 'express-session'
+import cors from 'cors'
 import { DbContext } from './types'
 
 import connectMongo from 'connect-mongo'
@@ -22,6 +23,12 @@ const main = async () => {
   await orm.getMigrator().up() // run migrations automatically before anything else
 
   const app = express()
+  app.use(
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true
+    })
+  )
 
   // Redis session middleware will run before Apollo middleware, because Redis session middleware will be used inside Apollo
   // so it needs to come first
@@ -53,7 +60,10 @@ const main = async () => {
     context: ({ req, res }): DbContext => ({ em: orm.em, req, res }) // to send Post type to the resolver
   })
 
-  apolloServer.applyMiddleware({ app })
+  apolloServer.applyMiddleware({
+    app,
+    cors: false // because we're gonna enable cors globally
+  })
 
   // app.get('/', (req, res) => {
   //   res.send('hello')
