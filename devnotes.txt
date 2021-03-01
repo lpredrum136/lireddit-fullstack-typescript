@@ -20,9 +20,9 @@ npm run start
 5. npm i --save-dev nodemon
 "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon dist/index.js",
+    "server": "nodemon dist/index.js",
     "startts": "ts-node src/index.ts",
-    "devts": "nodemon --exec ts-node src/index.ts",
+    "serverts": "nodemon --exec ts-node src/index.ts",
     "watch": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
@@ -137,7 +137,7 @@ I don't like URQL so gonna use Apollo Client
 cd lireddit-client
 npm install @apollo/client graphql
 
-Tam thoi chua dung duoc TS len Apollo Client, dang nghien cuu apollo codegen
+Tam thoi chua dung duoc TS len Apollo Client, vi chang le phai viet tay type and interface???, dang nghien cuu apollo codegen
 
 Neu ta gui 
 const client = new ApolloClient({
@@ -159,3 +159,41 @@ const app = express()
       credentials: true
     })
   )
+
+  Ben co su dung Graphql codegen nen chung ta se install codegen, so here we go
+IN CLIENT: npm install --save-dev @graphql-codegen/cli
+then init:
+npx graphql-codegen init:
+- React
+- Where is schema: http://localhost:4000/graphql
+- WHere to store operations and fragments? we already have a src/graphql-client folder (for testing earlier), enter src/graphql-client/**/*.graphql
+
+- Pick plugins: keep default (3 selected)
+- Where to write output: default
+- Introsepction: No
+- Name the config: default (codegen.yml)
+- What script? codegen
+
+Se tu tao ra codegen.yml va bao:
+Config file generated at codegen.yml
+    
+      $ npm install
+
+    To install the plugins.
+
+      $ npm run codegen
+
+    To run GraphQL Code Generator. 
+
+Next, change graphql-client/mutations.ts to graphql-client/mutations/register.graphql to match src/graphql-client/**/*.graphql above
+va bo gql di, tuc la 
+mutation RegisterUser($registerInput: AuthInput!) {
+  register(registerInput: $registerInput) {
+    code
+    ...
+  }
+}
+
+Finally, make sure your server run (npm run watch and npm run server), then in client, run:
+npm install (to install plugins)
+npm run codegen se ra file graphql.tsx toan la types ca

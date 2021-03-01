@@ -4,7 +4,7 @@ import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
 
-import { register } from '../graphql-client/mutations'
+import { register } from '../graphql-client/mutations/mutations'
 import { useMutation } from '@apollo/client'
 
 const Register = () => {
@@ -19,22 +19,8 @@ const Register = () => {
   }
 
   // GraphQL operations
-  interface UserMutationResponse {
-    code: number
-    success: boolean
-    message: string
-    user: string
-    errors: string
-  }
-  interface INewUser {
-    username: string
-    password: string
-  }
 
-  const [registerUser, { error, data }] = useMutation<
-    { register: UserMutationResponse },
-    { registerInput: INewUser }
-  >(register)
+  const [registerUser, { error, data }] = useMutation(register)
 
   return (
     <Wrapper variant="small">
