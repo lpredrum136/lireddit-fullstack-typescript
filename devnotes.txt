@@ -197,3 +197,5 @@ mutation RegisterUser($registerInput: AuthInput!) {
 Finally, make sure your server run (npm run watch and npm run server), then in client, run:
 npm install (to install plugins)
 npm run codegen se ra file graphql.tsx toan la types ca
+
+change client tsconfig.json: strict = true neu muon response.data?.register (? means may be undefined so it doesn't throw error)
