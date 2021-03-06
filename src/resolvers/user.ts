@@ -146,7 +146,7 @@ export class UserResolver {
         message: 'Wrong password. Try again',
         errors: [
           {
-            field: 'username',
+            field: 'password',
             message: 'Incorrect password'
           }
         ]

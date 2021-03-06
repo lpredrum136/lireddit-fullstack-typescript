@@ -160,6 +160,7 @@ const app = express()
     })
   )
 
+GRAPHQL CODEGEN
   Ben co su dung Graphql codegen nen chung ta se install codegen, so here we go
 IN CLIENT: npm install --save-dev @graphql-codegen/cli
 then init:
@@ -199,3 +200,23 @@ npm install (to install plugins)
 npm run codegen se ra file graphql.tsx toan la types ca
 
 change client tsconfig.json: strict = true neu muon response.data?.register (? means may be undefined so it doesn't throw error)
+
+REGISTER ERROR HANDLING 
+Xem git commit 
+
+NAVBAR
+Hoan thanh login: them login.graphql vao, cd lireddit-client, npm run codegen
+vao lireddit-client/tsconfig.json
+
+copy 1 dong khac tu server tsconfig.json
+"noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+Navbar: Neu logout (clear cookie) roi refresh se hien login register. Bam login, sau do redirect roi nhung van hien login register 
+Nguyen nhan la do graphql cache. Khi quay lai home page (redirect) graphql chi load tu cache ra ma thoi
