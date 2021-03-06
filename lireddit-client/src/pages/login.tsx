@@ -3,7 +3,7 @@ import { Formik, Form, FormikHelpers } from 'formik'
 import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
-import { AuthInput, useRegisterUserMutation } from '../generated/graphql'
+import { AuthInput, useLoginUserMutation } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 
 import { useRouter } from 'next/router'
@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 // import { register } from '../graphql-client/mutations/mutations' // old, without graphql codegen
 // import { useMutation } from '@apollo/client' // old, without graphql codegen
 
-const Register = () => {
+const Login = () => {
   // Router Next
   const router = useRouter()
 
@@ -29,10 +29,10 @@ const Register = () => {
     // con cai setErrors la tu may mo ra day haha
 
     const response = await registerUser({
-      variables: { registerInput: values }
+      variables: { loginInput: values }
     }) // response here is the {data: ....} below, when you use useRegisterUserMutation(). So you can response.data.register.user
 
-    if (response.data?.register.errors) {
+    if (response.data?.login.errors) {
       // if you do response.data.register.errors, if response.data is undefined, it will throw an error
       // adding a '?' to response.data says: if it's not undefined, dig down to register.errors, but if it is undefined, return undefined
 
@@ -41,8 +41,8 @@ const Register = () => {
       //   username: 'Hi error'
       // })
 
-      setErrors(toErrorMap(response.data.register.errors))
-    } else if (response.data?.register.user) {
+      setErrors(toErrorMap(response.data.login.errors))
+    } else if (response.data?.login.user) {
       // register successful
       router.push('/')
     }
@@ -50,7 +50,7 @@ const Register = () => {
 
   // GraphQL operations
 
-  const [registerUser, { loading, error, data }] = useRegisterUserMutation() // custom hook created by graphql codegen
+  const [registerUser, { loading, error, data }] = useLoginUserMutation() // custom hook created by graphql codegen
   // error here is server error, kinda like you have a typo somewhere
   // data is real structured data returned from GraphQL server (if you didn't make any typo)
 
@@ -58,7 +58,7 @@ const Register = () => {
     <Wrapper variant="small">
       {error && <p>Failed to register. Server error.</p>}
 
-      {data && data.register.success ? (
+      {data && data.login.success ? (
         <p>Registered successfully {JSON.stringify(data)}</p>
       ) : null}
 
@@ -86,7 +86,7 @@ const Register = () => {
               mt={4}
               isLoading={isSubmitting}
             >
-              Register
+              Login
             </Button>
           </Form>
         )}
@@ -95,4 +95,4 @@ const Register = () => {
   )
 }
 
-export default Register
+export default Login
