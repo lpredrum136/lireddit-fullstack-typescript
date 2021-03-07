@@ -6,7 +6,9 @@ import { Box, Button } from '@chakra-ui/react'
 import {
   AuthInput,
   useLoginUserMutation,
-  UserInfoFragmentDoc
+  UserInfoFragmentDoc,
+  MeDocument,
+  MeQuery
 } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 
@@ -36,9 +38,9 @@ const Login = () => {
       variables: { loginInput: values },
 
       // CACH 1: DUNG cache.modify()
-      // data o day la data nhan lai khi gui mutation di, tuc la co dang goc cua graphql: data: {login: {success: ..., code: ..., ..., user: {...}}}
+      // {data} o day la data nhan lai khi gui mutation di, tuc la co dang goc cua graphql: data: {login: {success: ..., code: ..., ..., user: {...}}}
       // thi cai data de writeFragment phai tuong ung voi cai shape cua fragment, la object co {id, username}
-      update(cache, { data }) {
+      /* update(cache, { data }) {
         cache.modify({
           fields: {
             me(oldMe) {
@@ -58,6 +60,25 @@ const Login = () => {
             }
           }
         })
+      } */
+
+      // CACH 2: DUNG cache.readQuery() va cache.writeQuery()
+      update(cache, { data }) {
+        const meData = cache.readQuery<MeQuery>({
+          query: MeDocument
+        }) // buoc nay trong truong hop nay thuc ra khong can vi co thay doi cai "me" nay dau. Nhung no la cai suon` cho nhieu truong hop khac.
+        // meData here is {me: {id, username}}
+
+        console.log(meData)
+
+        if (data?.login.success) {
+          cache.writeQuery<MeQuery>({
+            query: MeDocument,
+            data: {
+              me: data.login.user // nho la data.login.user o day phai trung voi shape cua "me", tuc la co id va username, vay nen Fragment la rat can thiet
+            }
+          })
+        }
       }
     }) // response here is the {data: ....} below, when you use useloginUserMutation(). So you can response.data.login.user
 
