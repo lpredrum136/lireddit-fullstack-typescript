@@ -1,11 +1,8 @@
 mutation RegisterUser($registerInput: AuthInput!) {
   register(registerInput: $registerInput) {
-    code
-    success
-    message
+    ...mutationResponseStatuses
     user {
-      id
-      username
+      ...userInfo
     }
     errors {
       field

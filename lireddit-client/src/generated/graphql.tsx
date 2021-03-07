@@ -106,6 +106,16 @@ export type AuthInput = {
   password: Scalars['String'];
 };
 
+export type MutationResponseStatusesFragment = (
+  { __typename?: 'UserMutationResponse' }
+  & Pick<UserMutationResponse, 'code' | 'success' | 'message'>
+);
+
+export type UserInfoFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'id' | 'username'>
+);
+
 export type LoginUserMutationVariables = Exact<{
   loginInput: AuthInput;
 }>;
@@ -115,14 +125,14 @@ export type LoginUserMutation = (
   { __typename?: 'Mutation' }
   & { login: (
     { __typename?: 'UserMutationResponse' }
-    & Pick<UserMutationResponse, 'code' | 'success' | 'message'>
     & { user?: Maybe<(
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
+      & UserInfoFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & Pick<FieldError, 'field' | 'message'>
     )>> }
+    & MutationResponseStatusesFragment
   ) }
 );
 
@@ -135,14 +145,14 @@ export type RegisterUserMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'UserMutationResponse' }
-    & Pick<UserMutationResponse, 'code' | 'success' | 'message'>
     & { user?: Maybe<(
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
+      & UserInfoFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & Pick<FieldError, 'field' | 'message'>
     )>> }
+    & MutationResponseStatusesFragment
   ) }
 );
 
@@ -153,20 +163,29 @@ export type MeQuery = (
   { __typename?: 'Query' }
   & { me?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'username'>
+    & UserInfoFragment
   )> }
 );
 
-
+export const MutationResponseStatusesFragmentDoc = gql`
+    fragment mutationResponseStatuses on UserMutationResponse {
+  code
+  success
+  message
+}
+    `;
+export const UserInfoFragmentDoc = gql`
+    fragment userInfo on User {
+  id
+  username
+}
+    `;
 export const LoginUserDocument = gql`
     mutation LoginUser($loginInput: AuthInput!) {
   login(loginInput: $loginInput) {
-    code
-    success
-    message
+    ...mutationResponseStatuses
     user {
-      id
-      username
+      ...userInfo
     }
     errors {
       field
@@ -174,7 +193,8 @@ export const LoginUserDocument = gql`
     }
   }
 }
-    `;
+    ${MutationResponseStatusesFragmentDoc}
+${UserInfoFragmentDoc}`;
 export type LoginUserMutationFn = Apollo.MutationFunction<LoginUserMutation, LoginUserMutationVariables>;
 
 /**
@@ -203,12 +223,9 @@ export type LoginUserMutationOptions = Apollo.BaseMutationOptions<LoginUserMutat
 export const RegisterUserDocument = gql`
     mutation RegisterUser($registerInput: AuthInput!) {
   register(registerInput: $registerInput) {
-    code
-    success
-    message
+    ...mutationResponseStatuses
     user {
-      id
-      username
+      ...userInfo
     }
     errors {
       field
@@ -216,7 +233,8 @@ export const RegisterUserDocument = gql`
     }
   }
 }
-    `;
+    ${MutationResponseStatusesFragmentDoc}
+${UserInfoFragmentDoc}`;
 export type RegisterUserMutationFn = Apollo.MutationFunction<RegisterUserMutation, RegisterUserMutationVariables>;
 
 /**
@@ -245,11 +263,10 @@ export type RegisterUserMutationOptions = Apollo.BaseMutationOptions<RegisterUse
 export const MeDocument = gql`
     query Me {
   me {
-    id
-    username
+    ...userInfo
   }
 }
-    `;
+    ${UserInfoFragmentDoc}`;
 
 /**
  * __useMeQuery__

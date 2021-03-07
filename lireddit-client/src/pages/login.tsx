@@ -3,12 +3,16 @@ import { Formik, Form, FormikHelpers } from 'formik'
 import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
-import { AuthInput, useLoginUserMutation } from '../generated/graphql'
+import {
+  AuthInput,
+  useLoginUserMutation,
+  UserInfoFragmentDoc
+} from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 
 import { useRouter } from 'next/router'
 
-// import { register } from '../graphql-client/mutations/mutations' // old, without graphql codegen
+// import { login } from '../graphql-client/mutations/mutations' // old, without graphql codegen
 // import { useMutation } from '@apollo/client' // old, without graphql codegen
 
 const Login = () => {
@@ -21,20 +25,45 @@ const Login = () => {
     password: ''
   }
 
-  const onRegisterSubmit = async (
+  const onLoginSubmit = async (
     values: AuthInput,
     { setErrors }: FormikHelpers<AuthInput>
   ) => {
     // o params ben tren: values cung duoc nhung neu client/tsconfig.json/strict la true thi no se bat loi
     // con cai setErrors la tu may mo ra day haha
 
-    const response = await registerUser({
-      variables: { loginInput: values }
-    }) // response here is the {data: ....} below, when you use useRegisterUserMutation(). So you can response.data.register.user
+    const response = await loginUser({
+      variables: { loginInput: values },
+
+      // CACH 1: DUNG cache.modify()
+      // data o day la data nhan lai khi gui mutation di, tuc la co dang goc cua graphql: data: {login: {success: ..., code: ..., ..., user: {...}}}
+      // thi cai data de writeFragment phai tuong ung voi cai shape cua fragment, la object co {id, username}
+      update(cache, { data }) {
+        cache.modify({
+          fields: {
+            me(oldMe) {
+              console.log('DATA', data)
+              console.log(oldMe)
+
+              if (data?.login.success) {
+                const newMe = cache.writeFragment({
+                  data: data?.login.user,
+                  fragment: UserInfoFragmentDoc
+                })
+
+                return newMe
+              } else {
+                return oldMe
+              }
+            }
+          }
+        })
+      }
+    }) // response here is the {data: ....} below, when you use useloginUserMutation(). So you can response.data.login.user
 
     if (response.data?.login.errors) {
-      // if you do response.data.register.errors, if response.data is undefined, it will throw an error
-      // adding a '?' to response.data says: if it's not undefined, dig down to register.errors, but if it is undefined, return undefined
+      // if you do response.data.login.errors, if response.data is undefined, it will throw an error
+      // adding a '?' to response.data says: if it's not undefined, dig down to login.errors, but if it is undefined, return undefined
 
       // For example, setErrors() is from Formik
       // setErrors({
@@ -43,26 +72,26 @@ const Login = () => {
 
       setErrors(toErrorMap(response.data.login.errors))
     } else if (response.data?.login.user) {
-      // register successful
+      // login successful
       router.push('/')
     }
   }
 
   // GraphQL operations
 
-  const [registerUser, { loading, error, data }] = useLoginUserMutation() // custom hook created by graphql codegen
+  const [loginUser, { loading, error, data }] = useLoginUserMutation() // custom hook created by graphql codegen
   // error here is server error, kinda like you have a typo somewhere
   // data is real structured data returned from GraphQL server (if you didn't make any typo)
 
   return (
     <Wrapper variant="small">
-      {error && <p>Failed to register. Server error.</p>}
+      {error && <p>Failed to login. Server error.</p>}
 
       {data && data.login.success ? (
-        <p>Registered successfully {JSON.stringify(data)}</p>
+        <p>logined successfully {JSON.stringify(data)}</p>
       ) : null}
 
-      <Formik initialValues={initialValues} onSubmit={onRegisterSubmit}>
+      <Formik initialValues={initialValues} onSubmit={onLoginSubmit}>
         {({ isSubmitting }) => (
           <Form>
             <InputField
