@@ -3,7 +3,12 @@ import { Formik, Form, FormikHelpers } from 'formik'
 import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
-import { AuthInput, useRegisterUserMutation } from '../generated/graphql'
+import {
+  AuthInput,
+  MeDocument,
+  MeQuery,
+  useRegisterUserMutation
+} from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 
 import { useRouter } from 'next/router'
@@ -29,7 +34,19 @@ const Register = () => {
     // con cai setErrors la tu may mo ra day haha
 
     const response = await registerUser({
-      variables: { registerInput: values }
+      variables: { registerInput: values },
+      update(cache, { data }) {
+        // De xem 3 cach khac nhau de update cache va tai sao dung cach nao thi xem login.tsx
+
+        if (data?.register.success) {
+          cache.writeQuery<MeQuery>({
+            query: MeDocument,
+            data: {
+              me: data.register.user // nho la data.register.user o day phai trung voi shape cua "me", tuc la co id va username, vay nen Fragment la rat can thiet
+            }
+          })
+        }
+      }
     }) // response here is the {data: ....} below, when you use useRegisterUserMutation(). So you can response.data.register.user
 
     if (response.data?.register.errors) {

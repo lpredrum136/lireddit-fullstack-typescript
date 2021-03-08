@@ -80,6 +80,8 @@ const Login = () => {
           })
         }
       }
+
+      // CACH 3: DUNG refetchQueries qua de
     }) // response here is the {data: ....} below, when you use useloginUserMutation(). So you can response.data.login.user
 
     if (response.data?.login.errors) {
