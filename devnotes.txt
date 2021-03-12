@@ -220,3 +220,5 @@ copy 1 dong khac tu server tsconfig.json
 
 Navbar: Neu logout (clear cookie) roi refresh se hien login register. Bam login, sau do redirect roi nhung van hien login register 
 Nguyen nhan la do graphql cache. Khi quay lai home page (redirect) graphql chi load tu cache ra ma thoi
+
+LOGOUT

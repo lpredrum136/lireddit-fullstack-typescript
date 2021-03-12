@@ -13,6 +13,7 @@ import { User } from '../entities/User'
 import argon2 from 'argon2'
 import { IMutationResponse } from '../entities/MutationResponse'
 import { FieldError } from '../entities/FieldError'
+import { COOKIE_NAME } from '../constants'
 
 @InputType()
 class AuthInput {
@@ -165,5 +166,19 @@ export class UserResolver {
       message: 'Logged in user successfully',
       user
     }
+  }
+
+  @Mutation(_returns => Boolean)
+  logout(@Ctx() { req, res }: DbContext): Promise<Boolean> {
+    return new Promise((resolve, _reject) => {
+      res.clearCookie(COOKIE_NAME)
+
+      req.session.destroy(error => {
+        if (error) {
+          console.log(error)
+          resolve(false)
+        } else resolve(true)
+      })
+    })
   }
 }
