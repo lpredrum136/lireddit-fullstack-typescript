@@ -1,9 +1,36 @@
 import { Box, Flex, Link, Button } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { useMeQuery } from '../generated/graphql'
+import {
+  MeDocument,
+  MeQuery,
+  useLogoutUserMutation,
+  useMeQuery
+} from '../generated/graphql'
 
 const Navbar = () => {
-  const { data, loading, error } = useMeQuery()
+  const [
+    logoutUser,
+    { loading: useLogoutUserMutationLoading } // vi sao viet duoc nhu nay? xem o duoi
+  ] = useLogoutUserMutation()
+
+  const logout = async () => {
+    await logoutUser({
+      // clear user from cache
+      update(cache, { data }) {
+        if (data?.logout) {
+          cache.writeQuery<MeQuery>({
+            query: MeDocument,
+            data: {
+              me: null
+            }
+          })
+        }
+      }
+    })
+  }
+
+  const { data, loading, error: _useMeQueryError } = useMeQuery() // neu de error khong thi se loi unused, neu chuyen thanh _error thi k duoc vi object k co property nao ten la _error
+  // the nen co the doi ten: error: useMeQueryError, va neu k dung toi thi: error: _useMeQueryError
 
   let body = null
 
@@ -31,13 +58,19 @@ const Navbar = () => {
     body = (
       <Flex>
         <Box mr={2}>{data.me.username}</Box>
-        <Button variant="link">Logout</Button>
+        <Button
+          variant="link"
+          onClick={logout}
+          isLoading={useLogoutUserMutationLoading}
+        >
+          Logout
+        </Button>
       </Flex>
     )
   }
 
   return (
-    <Flex bg="tomato" p={4} ml={'auto'}>
+    <Flex bg="tan" p={4} ml={'auto'}>
       <Box ml="auto">{body}</Box>
     </Flex>
   )
