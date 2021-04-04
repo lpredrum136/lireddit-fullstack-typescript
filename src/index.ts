@@ -15,10 +15,12 @@ import cors from 'cors'
 import { DbContext } from './types'
 
 import connectMongo from 'connect-mongo'
+// import { sendEmail } from './utils/sendEmail'
 
 require('dotenv')
 
 const main = async () => {
+  // sendEmail('lpredrum136@gmail.com', 'hi henry') // after you send this, get the console log username and password and hardcode it in sendEmail.ts
   const orm = await MikroORM.init(mikroConfig)
   await orm.getMigrator().up() // run migrations automatically before anything else
 

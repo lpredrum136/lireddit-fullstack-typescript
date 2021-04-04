@@ -233,3 +233,8 @@ me => browser http://localhost:3000
 -> next builds html and sends back to browser
 
 https://youtu.be/I6ypD7qv3Z8?t=14169
+
+TAO EMAIL
+vao server (tuc la thu muc goc)
+npm i nodemailer
+npm i @types/nodemailer --save-dev
