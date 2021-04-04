@@ -238,3 +238,5 @@ TAO EMAIL
 vao server (tuc la thu muc goc)
 npm i nodemailer
 npm i @types/nodemailer --save-dev
+
+nho la khi chinh cai gi trong Entities thi chay lai lenh create:migration trong package.json de update tren DB
