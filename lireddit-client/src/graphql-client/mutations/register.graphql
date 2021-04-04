@@ -1,4 +1,4 @@
-mutation RegisterUser($registerInput: AuthInput!) {
+mutation RegisterUser($registerInput: RegisterInput!) {
   register(registerInput: $registerInput) {
     ...mutationResponseStatuses
     user {

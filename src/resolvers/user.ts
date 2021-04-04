@@ -3,7 +3,6 @@ import {
   Arg,
   Ctx,
   Field,
-  InputType,
   Mutation,
   ObjectType,
   Query,
@@ -14,15 +13,9 @@ import argon2 from 'argon2'
 import { IMutationResponse } from '../entities/MutationResponse'
 import { FieldError } from '../entities/FieldError'
 import { COOKIE_NAME } from '../constants'
-
-@InputType()
-class AuthInput {
-  @Field()
-  username: string
-
-  @Field()
-  password: string
-}
+import { RegisterInput } from '../entities/RegisterInput'
+import { LoginInput } from '../entities/LoginInput'
+import { validateRegisterInput } from '../utils/validateRegisterInput'
 
 @ObjectType({ implements: IMutationResponse })
 class UserMutationResponse implements IMutationResponse {
@@ -39,6 +32,12 @@ class UserMutationResponse implements IMutationResponse {
 
 @Resolver()
 export class UserResolver {
+  // Forgot password
+  @Mutation(_returns => Boolean)
+  async forgotPassword(@Arg('email') email: string, @Ctx() { em }: DbContext) {
+    // const user = await em.findOne(User, { email })
+    return true
+  }
   // Me query
   @Query(_returns => User, { nullable: true })
   async me(@Ctx() { em, req }: DbContext): Promise<User | null> {
@@ -52,40 +51,17 @@ export class UserResolver {
 
   @Mutation(_returns => UserMutationResponse)
   async register(
-    @Arg('registerInput') registerInput: AuthInput,
+    @Arg('registerInput') registerInput: RegisterInput,
     @Ctx() { em, req }: DbContext
   ): Promise<UserMutationResponse> {
-    if (registerInput.username.length <= 2) {
-      return {
-        code: 400,
-        success: false,
-        message: 'Invalid username',
-        errors: [
-          {
-            field: 'username',
-            message: 'Length must be greater than 2'
-          }
-        ]
-      }
-    }
-
-    if (registerInput.password.length <= 3) {
-      return {
-        code: 400,
-        success: false,
-        message: 'Invalid password',
-        errors: [
-          {
-            field: 'password',
-            message: 'Length must be greater than 3'
-          }
-        ]
-      }
-    }
+    const validationResults = validateRegisterInput(registerInput)
+    if (validationResults !== null)
+      return { code: 400, success: false, ...validationResults }
 
     const hashedPassword = await argon2.hash(registerInput.password)
     const newUser = em.create(User, {
       username: registerInput.username,
+      email: registerInput.email,
       password: hashedPassword
     })
 
@@ -117,10 +93,16 @@ export class UserResolver {
 
   @Mutation(_returns => UserMutationResponse)
   async login(
-    @Arg('loginInput') loginInput: AuthInput,
+    @Arg('loginInput') loginInput: LoginInput,
     @Ctx() { em, req }: DbContext
   ): Promise<UserMutationResponse> {
-    const user = await em.findOne(User, { username: loginInput.username })
+    const user = await em.findOne(
+      User,
+      loginInput.usernameOrEmail.includes('@')
+        ? { email: loginInput.usernameOrEmail }
+        : { username: loginInput.usernameOrEmail }
+    )
+
     if (!user) {
       return {
         code: 400,
@@ -128,7 +110,7 @@ export class UserResolver {
         message: 'Cannot find user',
         errors: [
           {
-            field: 'username',
+            field: 'usernameOrEmail',
             message: 'Username does not exist'
           }
         ]

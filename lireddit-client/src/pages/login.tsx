@@ -4,7 +4,7 @@ import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
 import {
-  AuthInput,
+  LoginInput,
   useLoginUserMutation,
   // UserInfoFragmentDoc,
   MeDocument,
@@ -23,13 +23,13 @@ const Login = () => {
 
   // Form
   const initialValues = {
-    username: '',
+    usernameOrEmail: '',
     password: ''
   }
 
   const onLoginSubmit = async (
-    values: AuthInput,
-    { setErrors }: FormikHelpers<AuthInput>
+    values: LoginInput,
+    { setErrors }: FormikHelpers<LoginInput>
   ) => {
     // o params ben tren: values cung duoc nhung neu client/tsconfig.json/strict la true thi no se bat loi
     // con cai setErrors la tu may mo ra day haha
@@ -121,9 +121,9 @@ const Login = () => {
         {({ isSubmitting }) => (
           <Form>
             <InputField
-              name="username"
-              placeholder="Username"
-              label="Username"
+              name="usernameOrEmail"
+              placeholder="Username or Email"
+              label="Username or Email"
               type="text"
             />
             <Box mt={4}>

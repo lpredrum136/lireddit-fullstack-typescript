@@ -4,7 +4,7 @@ import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
 import { Box, Button } from '@chakra-ui/react'
 import {
-  AuthInput,
+  RegisterInput,
   MeDocument,
   MeQuery,
   useRegisterUserMutation
@@ -23,12 +23,13 @@ const Register = () => {
   // Form
   const initialValues = {
     username: '',
+    email: '',
     password: ''
   }
 
   const onRegisterSubmit = async (
-    values: AuthInput,
-    { setErrors }: FormikHelpers<AuthInput>
+    values: RegisterInput,
+    { setErrors }: FormikHelpers<RegisterInput>
   ) => {
     // o params ben tren: values cung duoc nhung neu client/tsconfig.json/strict la true thi no se bat loi
     // con cai setErrors la tu may mo ra day haha
@@ -91,6 +92,14 @@ const Register = () => {
               label="Username"
               type="text"
             />
+            <Box mt={4}>
+              <InputField
+                name="email"
+                placeholder="Email"
+                label="Email"
+                type="text"
+              />
+            </Box>
             <Box mt={4}>
               <InputField
                 name="password"

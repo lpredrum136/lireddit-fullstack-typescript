@@ -1,4 +1,4 @@
-mutation LoginUser($loginInput: AuthInput!) {
+mutation LoginUser($loginInput: LoginInput!) {
   login(loginInput: $loginInput) {
     ...mutationResponseStatuses
     user {

@@ -240,3 +240,6 @@ npm i nodemailer
 npm i @types/nodemailer --save-dev
 
 nho la khi chinh cai gi trong Entities thi chay lai lenh create:migration trong package.json de update tren DB
+Doan nay k duoc, phai vao pgAdmin4 xoa ca table user di, xoa dist folder di, xoa het file trong src/migrations di
+sau do phai chay lai npm run create:migration, npm run watch, npm run server moi them duoc cot email
+sau do phai doi trong resolver de nhan them property email
