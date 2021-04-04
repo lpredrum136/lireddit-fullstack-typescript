@@ -222,3 +222,11 @@ Navbar: Neu logout (clear cookie) roi refresh se hien login register. Bam login,
 Nguyen nhan la do graphql cache. Khi quay lai home page (redirect) graphql chi load tu cache ra ma thoi
 
 LOGOUT
+
+CHUAN BI SETUP SSR
+npm i deepmerge lodash (for SSR)
+
+SSR la gi?
+
+
+https://youtu.be/I6ypD7qv3Z8?t=14169

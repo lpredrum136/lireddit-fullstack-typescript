@@ -67,7 +67,10 @@ const Register = () => {
 
   // GraphQL operations
 
-  const [registerUser, { loading, error, data }] = useRegisterUserMutation() // custom hook created by graphql codegen
+  const [
+    registerUser,
+    { loading: _registerUserMutationLoading, error, data }
+  ] = useRegisterUserMutation() // custom hook created by graphql codegen
   // error here is server error, kinda like you have a typo somewhere
   // data is real structured data returned from GraphQL server (if you didn't make any typo)
 
