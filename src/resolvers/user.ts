@@ -16,6 +16,8 @@ import { COOKIE_NAME } from '../constants'
 import { RegisterInput } from '../entities/RegisterInput'
 import { LoginInput } from '../entities/LoginInput'
 import { validateRegisterInput } from '../utils/validateRegisterInput'
+import { sendEmail } from '../utils/sendEmail'
+import { v4 as uuidv4 } from 'uuid'
 
 @ObjectType({ implements: IMutationResponse })
 class UserMutationResponse implements IMutationResponse {
@@ -35,8 +37,20 @@ export class UserResolver {
   // Forgot password
   @Mutation(_returns => Boolean)
   async forgotPassword(@Arg('email') email: string, @Ctx() { em }: DbContext) {
-    // const user = await em.findOne(User, { email })
-    return true
+    const user = await em.findOne(User, { email })
+
+    if (!user) {
+      // email is not registered in db
+      return true // not doing anything, doesn't let user know that user exists
+    }
+
+    // send email
+    const token = uuidv4()
+    sessionStore.set()
+    sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+    )
   }
   // Me query
   @Query(_returns => User, { nullable: true })

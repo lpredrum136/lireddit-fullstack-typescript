@@ -35,13 +35,14 @@ const main = async () => {
   // Redis session middleware will run before Apollo middleware, because Redis session middleware will be used inside Apollo
   // so it needs to come first
   const mongoStore = connectMongo(session)
+  const sessionStore = new mongoStore({
+    url: `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
+  })
 
   app.use(
     session({
       name: COOKIE_NAME,
-      store: new mongoStore({
-        url: `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
-      }),
+      store: sessionStore,
       cookie: {
         maxAge: 1000 * 60 * 60, // one hour
         httpOnly: true, // Good practice, JS front end cannot access the cookie
@@ -59,7 +60,11 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false
     }),
-    context: ({ req, res }): DbContext => ({ em: orm.em, req, res }) // to send Post type to the resolver
+    context: ({ req, res }): DbContext => ({
+      em: orm.em,
+      req,
+      res
+    }) // to send Post type to the resolver
   })
 
   apolloServer.applyMiddleware({

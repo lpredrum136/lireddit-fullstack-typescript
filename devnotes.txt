@@ -243,3 +243,12 @@ nho la khi chinh cai gi trong Entities thi chay lai lenh create:migration trong 
 Doan nay k duoc, phai vao pgAdmin4 xoa ca table user di, xoa dist folder di, xoa het file trong src/migrations di
 sau do phai chay lai npm run create:migration, npm run watch, npm run server moi them duoc cot email
 sau do phai doi trong resolver de nhan them property email
+
+QUAY LAI DOI FORGOT PASSWORD 
+npm i uuid
+npm i @types/uuid --save-dev
+Ben awad con chay ca: npm i ioredis va npm i --save-dev @types/ioredis
+
+Ben Awad luu forgot password token trong redis nhung chung ta k co redis nen se luu trong db thong thuong postgresql vay,
+cho nay dung jsonwebtoken cung duoc,
+dai khai la tim duoc ra email cua user dang request forgot password, roi tra cho ho mot token gi do gan voi ho trong db
