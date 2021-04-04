@@ -1,9 +1,7 @@
-import { Post } from '..//entities/Post'
-import { DbContext } from '..//types'
+import { Post } from '../entities/Post'
+import { DbContext } from '../types'
 import { Arg, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
-
-// Fake slow loading
-// const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+// import { sleep } from '../utils/sleep'
 
 @Resolver()
 export class PostResolver {
