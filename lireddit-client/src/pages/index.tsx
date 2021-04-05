@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar'
 import { PostsDocument, usePostsQuery } from '../generated/graphql'
 import { addApolloState, initialiseApollo } from '../lib/apolloClient'
+import { GetStaticProps } from 'next'
 
 const Index = () => {
   const { data } = usePostsQuery()
@@ -19,7 +20,7 @@ const Index = () => {
   )
 }
 
-export const getStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const apolloClient = initialiseApollo()
 
   await apolloClient.query({ query: PostsDocument })
