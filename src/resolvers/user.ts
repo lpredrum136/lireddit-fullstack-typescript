@@ -18,6 +18,7 @@ import { LoginInput } from '../entities/LoginInput'
 import { validateRegisterInput } from '../utils/validateRegisterInput'
 import { sendEmail } from '../utils/sendEmail'
 import { v4 as uuidv4 } from 'uuid'
+import { TokenModel } from '../models/Token'
 
 @ObjectType({ implements: IMutationResponse })
 class UserMutationResponse implements IMutationResponse {
@@ -44,13 +45,24 @@ export class UserResolver {
       return true // not doing anything, doesn't let user know that user exists
     }
 
-    // send email
-    const token = uuidv4()
-    sessionStore.set()
-    sendEmail(
+    // find and delete any token associated with this user (user in PostgreSQL, token in MongoDB)
+    await TokenModel.findOneAndDelete({ userId: `${user.id}` })
+
+    // create unique token for user to click in email
+    const resetToken = uuidv4()
+    const hashedResetToken = await argon2.hash(resetToken)
+
+    await new TokenModel({
+      userId: `${user.id}`,
+      token: hashedResetToken
+    }).save()
+
+    await sendEmail(
       email,
-      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+      `<a href="http://localhost:3000/change-password/${resetToken}">Click here to reset password</a>`
     )
+
+    return true
   }
   // Me query
   @Query(_returns => User, { nullable: true })

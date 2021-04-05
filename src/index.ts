@@ -13,6 +13,7 @@ import { UserResolver } from './resolvers/user'
 import session from 'express-session'
 import cors from 'cors'
 import { DbContext } from './types'
+import mongoose from 'mongoose'
 
 import connectMongo from 'connect-mongo'
 // import { sendEmail } from './utils/sendEmail'
@@ -32,11 +33,26 @@ const main = async () => {
     })
   )
 
+  // MongoDB normal connection
+  await mongoose.connect(
+    `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`,
+    {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    }
+  )
+  console.log('MongoDB connected yay')
+
   // Redis session middleware will run before Apollo middleware, because Redis session middleware will be used inside Apollo
   // so it needs to come first
   const mongoStore = connectMongo(session)
   const sessionStore = new mongoStore({
-    url: `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
+    // this is before forgot password work. Since we use mongodb normally in forgot password work, we can reuse mongoose connection
+    // url: `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
+
+    mongooseConnection: mongoose.connection
   })
 
   app.use(

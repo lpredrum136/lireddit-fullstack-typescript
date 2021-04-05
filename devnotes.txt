@@ -252,3 +252,12 @@ Ben awad con chay ca: npm i ioredis va npm i --save-dev @types/ioredis
 Ben Awad luu forgot password token trong redis nhung chung ta k co redis nen se luu trong db thong thuong postgresql vay,
 cho nay dung jsonwebtoken cung duoc,
 dai khai la tim duoc ra email cua user dang request forgot password, roi tra cho ho mot token gi do gan voi ho trong db
+
+Lam theo cai nay, vi k co redis, va mikroorm k ho tro expiration of token, nen se su dung mongodb vay
+https://blog.logrocket.com/implementing-a-secure-password-reset-in-node-js/
+
+npm i mongoose
+to be exact npm i mongoose@5.10.18 (for typegoose to work)
+npm i @types/mongoose --save-dev
+
+npm i @typegoose/typegoose
