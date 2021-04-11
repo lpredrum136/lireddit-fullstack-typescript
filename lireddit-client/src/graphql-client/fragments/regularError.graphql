@@ -1,0 +1,4 @@
+fragment regularError on FieldError {
+  field
+  message
+}
