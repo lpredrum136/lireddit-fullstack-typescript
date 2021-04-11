@@ -261,3 +261,5 @@ to be exact npm i mongoose@5.10.18 (for typegoose to work)
 npm i @types/mongoose --save-dev
 
 npm i @typegoose/typegoose
+
+https://youtu.be/I6ypD7qv3Z8?t=17529

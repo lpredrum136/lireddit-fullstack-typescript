@@ -19,6 +19,7 @@ import { validateRegisterInput } from '../utils/validateRegisterInput'
 import { sendEmail } from '../utils/sendEmail'
 import { v4 as uuidv4 } from 'uuid'
 import { TokenModel } from '../models/Token'
+import { ChangePasswordInput } from '../entities/ChangePasswordInput'
 
 @ObjectType({ implements: IMutationResponse })
 class UserMutationResponse implements IMutationResponse {
@@ -35,9 +36,109 @@ class UserMutationResponse implements IMutationResponse {
 
 @Resolver()
 export class UserResolver {
+  // Change password
+  @Mutation(_returns => UserMutationResponse)
+  async changePassword(
+    @Arg('token') token: string,
+    @Arg('userId') userId: string,
+    @Arg('changePasswordInput') changePasswordInput: ChangePasswordInput,
+    @Ctx() { req, em }: DbContext
+  ): Promise<UserMutationResponse> {
+    if (changePasswordInput.newPassword.length <= 3) {
+      return {
+        code: 400,
+        success: false,
+        message: 'Invalid password',
+        errors: [
+          {
+            field: 'newPassword',
+            message: 'Length must be greater than 3'
+          }
+        ]
+      }
+    }
+
+    try {
+      // check token
+      const resetPasswordToken = await TokenModel.findOne({ userId })
+      if (!resetPasswordToken) {
+        return {
+          code: 400,
+          success: false,
+          message: 'Invalid or expired password reset token',
+          errors: [
+            {
+              field: 'token',
+              message: 'Invalid or expired password reset token'
+            }
+          ]
+        }
+      }
+
+      const resetPasswordTokenValid = argon2.verify(
+        resetPasswordToken.token,
+        token
+      )
+      if (!resetPasswordTokenValid) {
+        return {
+          code: 400,
+          success: false,
+          message: 'Invalid or expired password reset token',
+          errors: [
+            {
+              field: 'token',
+              message: 'Invalid or expired password reset token'
+            }
+          ]
+        }
+      }
+
+      // all ok
+      const user = await em.findOne(User, { id: parseInt(userId) })
+
+      if (!user) {
+        return {
+          code: 400,
+          success: false,
+          message: 'User no longer exists',
+          errors: [
+            {
+              field: 'token',
+              message: 'User no longer exists'
+            }
+          ]
+        }
+      }
+
+      user.password = await argon2.hash(changePasswordInput.newPassword)
+
+      await em.persistAndFlush(user)
+
+      // login user after change password
+      req.session.userId = user.id
+
+      return {
+        code: 200,
+        success: true,
+        message: 'User password reset successfully',
+        user
+      }
+    } catch (error) {
+      console.log(error)
+      return {
+        code: 500,
+        success: false,
+        message: 'Internal server error'
+      }
+    }
+  }
+
   // Forgot password
   @Mutation(_returns => Boolean)
-  async forgotPassword(@Arg('email') email: string, @Ctx() { em }: DbContext) {
+  async forgotPassword(
+    @Arg('email') email: string,
+    @Ctx() { em }: DbContext
+  ): Promise<Boolean> {
     const user = await em.findOne(User, { email })
 
     if (!user) {
@@ -59,11 +160,12 @@ export class UserResolver {
 
     await sendEmail(
       email,
-      `<a href="http://localhost:3000/change-password/${resetToken}">Click here to reset password</a>`
+      `<a href="http://localhost:3000/change-password?token=${resetToken}&userId=${user.id}">Click here to reset password</a>`
     )
 
     return true
   }
+
   // Me query
   @Query(_returns => User, { nullable: true })
   async me(@Ctx() { em, req }: DbContext): Promise<User | null> {
