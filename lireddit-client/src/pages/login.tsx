@@ -2,7 +2,7 @@ import { Formik, Form, FormikHelpers } from 'formik'
 
 import Wrapper from '../components/Wrapper'
 import InputField from '../components/InputField'
-import { Box, Button } from '@chakra-ui/react'
+import { Box, Button, Link, Flex } from '@chakra-ui/react'
 import {
   LoginInput,
   useLoginUserMutation,
@@ -11,7 +11,7 @@ import {
   MeQuery
 } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
-
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
 // import { login } from '../graphql-client/mutations/mutations' // old, without graphql codegen
@@ -134,6 +134,11 @@ const Login = () => {
                 type="password"
               />
             </Box>
+            <Flex mt={2}>
+              <NextLink href="forgot-password">
+                <Link ml="auto">Forgot password?</Link>
+              </NextLink>
+            </Flex>
 
             <Button
               type="submit"

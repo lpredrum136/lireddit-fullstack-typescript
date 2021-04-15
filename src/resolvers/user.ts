@@ -114,6 +114,9 @@ export class UserResolver {
 
       await em.persistAndFlush(user)
 
+      // delete the token in MongoDB so user can't keep changing password using the same URL (sent in email)
+      await resetPasswordToken.deleteOne()
+
       // login user after change password
       req.session.userId = user.id
 

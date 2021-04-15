@@ -1,7 +1,7 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import Wrapper from '../../components/Wrapper'
 import { Formik, Form, FormikHelpers } from 'formik'
-import { Button, Box } from '@chakra-ui/react'
+import { Button, Box, Link, Flex } from '@chakra-ui/react'
 import InputField from '../../components/InputField'
 import {
   ChangePasswordInput,
@@ -10,6 +10,7 @@ import {
 import { toErrorMap } from '../../utils/toErrorMap'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import NextLink from 'next/link'
 
 const ChangePassword = ({
   token,
@@ -57,7 +58,16 @@ const ChangePassword = ({
               label="New Password"
               type="password"
             />
-            {tokenError ? <Box color="red">{tokenError}</Box> : null}
+            {tokenError ? (
+              <Flex>
+                <Box color="red" mr={2}>
+                  {tokenError}
+                </Box>
+                <NextLink href="forgot-password">
+                  <Link>Go forget password again!</Link>
+                </NextLink>
+              </Flex>
+            ) : null}
             <Button
               type="submit"
               colorScheme="teal"
