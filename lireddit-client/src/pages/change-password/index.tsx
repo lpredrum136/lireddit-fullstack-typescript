@@ -28,7 +28,7 @@ const ChangePassword = ({
   // Form
   const initialValues = { newPassword: '' }
 
-  const onLoginSubmit = async (
+  const onChangePasswordSubmit = async (
     values: ChangePasswordInput,
     { setErrors }: FormikHelpers<ChangePasswordInput>
   ) => {
@@ -49,7 +49,7 @@ const ChangePassword = ({
 
   return (
     <Wrapper variant="small">
-      <Formik initialValues={initialValues} onSubmit={onLoginSubmit}>
+      <Formik initialValues={initialValues} onSubmit={onChangePasswordSubmit}>
         {({ isSubmitting }) => (
           <Form>
             <InputField
@@ -63,7 +63,7 @@ const ChangePassword = ({
                 <Box color="red" mr={2}>
                   {tokenError}
                 </Box>
-                <NextLink href="forgot-password">
+                <NextLink href="/forgot-password">
                   <Link>Go forget password again!</Link>
                 </NextLink>
               </Flex>

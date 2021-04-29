@@ -20,6 +20,7 @@ import { sendEmail } from '../utils/sendEmail'
 import { v4 as uuidv4 } from 'uuid'
 import { TokenModel } from '../models/Token'
 import { ChangePasswordInput } from '../entities/ChangePasswordInput'
+import { ForgotPasswordInput } from '../entities/ForgotPasswordInput'
 
 @ObjectType({ implements: IMutationResponse })
 class UserMutationResponse implements IMutationResponse {
@@ -139,10 +140,10 @@ export class UserResolver {
   // Forgot password
   @Mutation(_returns => Boolean)
   async forgotPassword(
-    @Arg('email') email: string,
+    @Arg('forgotPasswordInput') forgotPasswordInput: ForgotPasswordInput,
     @Ctx() { em }: DbContext
   ): Promise<Boolean> {
-    const user = await em.findOne(User, { email })
+    const user = await em.findOne(User, { email: forgotPasswordInput.email })
 
     if (!user) {
       // email is not registered in db
@@ -162,7 +163,7 @@ export class UserResolver {
     }).save()
 
     await sendEmail(
-      email,
+      forgotPasswordInput.email,
       `<a href="http://localhost:3000/change-password?token=${resetToken}&userId=${user.id}">Click here to reset password</a>`
     )
 

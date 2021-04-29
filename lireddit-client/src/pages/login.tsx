@@ -135,7 +135,7 @@ const Login = () => {
               />
             </Box>
             <Flex mt={2}>
-              <NextLink href="forgot-password">
+              <NextLink href="/forgot-password">
                 <Link ml="auto">Forgot password?</Link>
               </NextLink>
             </Flex>
