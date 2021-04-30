@@ -1,30 +1,46 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+// import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity } from 'typeorm'
+import {
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity
+} from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
 
 @ObjectType() // graphql stuff
 @Entity() // db table
-export class User {
+export class User extends BaseEntity {
   @Field(_type => ID) // graphql stuff, by default, this means Graphql NOT NULL, going with the '!' icon on the field, if you want it to be nullable, do {nullable: true} and id?: number
-  @PrimaryKey() // column in db table
+  // @PrimaryKey() // column in db table, MikroORM style
+  @PrimaryGeneratedColumn()
   id!: number
 
   @Field()
-  @Property()
-  createdAt: Date = new Date()
+  // @Property() // MikroORM style
+  @CreateDateColumn()
+  // createdAt: Date = new Date() // no need to initialise when using typeorm
+  createdAt: Date
 
   @Field()
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date()
+  // @Property({ onUpdate: () => new Date() }) // MikroORM style
+  @UpdateDateColumn()
+  // updatedAt: Date = new Date() // no need when using typeorm
+  updatedAt: Date
 
   @Field()
-  @Property({ type: 'text', unique: true }) // column
+  // @Property({ type: 'text', unique: true }) // column // MikroORM style
+  @Column({ unique: true })
   username!: string
 
   @Field()
-  @Property({ type: 'text', unique: true }) // column
+  // @Property({ type: 'text', unique: true }) // column // MikroORM style
+  @Column({ unique: true })
   email!: string
 
   // No @Field() to prevent this from being exposed to graphql
-  @Property({ type: 'text' }) // column
+  // @Property({ type: 'text' }) // column // MikroORM style
+  @Column()
   password!: string
 }

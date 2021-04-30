@@ -1,8 +1,10 @@
+require('dotenv').config()
+
 import 'reflect-metadata'
-import { MikroORM } from '@mikro-orm/core'
+// import { MikroORM } from '@mikro-orm/core'
 import { COOKIE_NAME, __prod__ } from './constants'
 // import { Post } from './entities/Post'
-import mikroConfig from './mikro-orm.config'
+// import mikroConfig from './mikro-orm.config'
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
@@ -18,12 +20,25 @@ import mongoose from 'mongoose'
 import connectMongo from 'connect-mongo'
 // import { sendEmail } from './utils/sendEmail'
 
-require('dotenv')
+import { createConnection } from 'typeorm'
+import { User } from './entities/User'
+import { Post } from './entities/Post'
 
 const main = async () => {
+  const connection = await createConnection({
+    type: 'postgres',
+    database: 'lireddit2',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    logging: true,
+    synchronize: true, // tao db ngay tu khi khoi dong
+    entities: [Post, User]
+  })
+
   // sendEmail('lpredrum136@gmail.com', 'hi henry') // after you send this, get the console log username and password and hardcode it in sendEmail.ts
-  const orm = await MikroORM.init(mikroConfig)
-  await orm.getMigrator().up() // run migrations automatically before anything else
+
+  // const orm = await MikroORM.init(mikroConfig)
+  // await orm.getMigrator().up() // run migrations automatically before anything else
 
   const app = express()
   app.use(
@@ -77,7 +92,7 @@ const main = async () => {
       validate: false
     }),
     context: ({ req, res }): DbContext => ({
-      em: orm.em,
+      // em: orm.em,
       req,
       res
     }) // to send Post type to the resolver

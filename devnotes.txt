@@ -263,3 +263,7 @@ npm i @types/mongoose --save-dev
 npm i @typegoose/typegoose
 
 https://youtu.be/I6ypD7qv3Z8?t=19198
+
+TYPEORM 
+
+npm i typeorm 

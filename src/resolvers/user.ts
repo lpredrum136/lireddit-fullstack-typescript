@@ -43,7 +43,7 @@ export class UserResolver {
     @Arg('token') token: string,
     @Arg('userId') userId: string,
     @Arg('changePasswordInput') changePasswordInput: ChangePasswordInput,
-    @Ctx() { req, em }: DbContext
+    @Ctx() { req /*, em */ }: DbContext
   ): Promise<UserMutationResponse> {
     if (changePasswordInput.newPassword.length <= 3) {
       return {
@@ -95,7 +95,9 @@ export class UserResolver {
       }
 
       // all ok
-      const user = await em.findOne(User, { id: parseInt(userId) })
+      // const user = await em.findOne(User, { id: parseInt(userId) })
+      const userIdNum = parseInt(userId)
+      const user = await User.findOne(userIdNum)
 
       if (!user) {
         return {
@@ -111,9 +113,11 @@ export class UserResolver {
         }
       }
 
-      user.password = await argon2.hash(changePasswordInput.newPassword)
+      // user.password = await argon2.hash(changePasswordInput.newPassword)
+      // await em.persistAndFlush(user)
 
-      await em.persistAndFlush(user)
+      const updatedPassword = await argon2.hash(changePasswordInput.newPassword)
+      await User.update({ id: userIdNum }, { password: updatedPassword })
 
       // delete the token in MongoDB so user can't keep changing password using the same URL (sent in email)
       await resetPasswordToken.deleteOne()
@@ -140,10 +144,11 @@ export class UserResolver {
   // Forgot password
   @Mutation(_returns => Boolean)
   async forgotPassword(
-    @Arg('forgotPasswordInput') forgotPasswordInput: ForgotPasswordInput,
-    @Ctx() { em }: DbContext
+    @Arg('forgotPasswordInput') forgotPasswordInput: ForgotPasswordInput
+    // @Ctx() { em }: DbContext
   ): Promise<Boolean> {
-    const user = await em.findOne(User, { email: forgotPasswordInput.email })
+    // const user = await em.findOne(User, { email: forgotPasswordInput.email })
+    const user = await User.findOne({ email: forgotPasswordInput.email })
 
     if (!user) {
       // email is not registered in db
@@ -172,34 +177,44 @@ export class UserResolver {
 
   // Me query
   @Query(_returns => User, { nullable: true })
-  async me(@Ctx() { em, req }: DbContext): Promise<User | null> {
+  async me(
+    @Ctx() { /* em, */ req }: DbContext
+  ): Promise<User | undefined | null> {
     // You are not logged in
     console.log(req.session)
     if (!req.session.userId) return null
 
-    const user = await em.findOne(User, { id: req.session.userId })
+    // const user = await em.findOne(User, { id: req.session.userId })
+    const user = await User.findOne(req.session.userId)
     return user
   }
 
   @Mutation(_returns => UserMutationResponse)
   async register(
     @Arg('registerInput') registerInput: RegisterInput,
-    @Ctx() { em, req }: DbContext
+    @Ctx() { /* em, */ req }: DbContext
   ): Promise<UserMutationResponse> {
     const validationResults = validateRegisterInput(registerInput)
     if (validationResults !== null)
       return { code: 400, success: false, ...validationResults }
 
     const hashedPassword = await argon2.hash(registerInput.password)
-    const newUser = em.create(User, {
+    // const newUser = em.create(User, {
+    //   username: registerInput.username,
+    //   email: registerInput.email,
+    //   password: hashedPassword
+    // })
+    const newUser = User.create({
       username: registerInput.username,
       email: registerInput.email,
       password: hashedPassword
     })
 
     try {
-      await em.persistAndFlush(newUser)
+      // await em.persistAndFlush(newUser)
+      await newUser.save()
     } catch (error) {
+      console.log('Error registering user: ', error)
       if (error.code === '23505' || error.detail.includes('already exists'))
         // duplicate username
         return {
@@ -226,10 +241,16 @@ export class UserResolver {
   @Mutation(_returns => UserMutationResponse)
   async login(
     @Arg('loginInput') loginInput: LoginInput,
-    @Ctx() { em, req }: DbContext
+    @Ctx() { /* em, */ req }: DbContext
   ): Promise<UserMutationResponse> {
-    const user = await em.findOne(
-      User,
+    // const user = await em.findOne(
+    //   User,
+    //   loginInput.usernameOrEmail.includes('@')
+    //     ? { email: loginInput.usernameOrEmail }
+    //     : { username: loginInput.usernameOrEmail }
+    // )
+
+    const user = await User.findOne(
       loginInput.usernameOrEmail.includes('@')
         ? { email: loginInput.usernameOrEmail }
         : { username: loginInput.usernameOrEmail }
