@@ -1,6 +1,16 @@
 import { Post } from '../entities/Post'
-// import { DbContext } from '../types'
-import { Arg, /* Ctx, */ ID, Mutation, Query, Resolver } from 'type-graphql'
+import { DbContext } from '../types'
+import {
+  Arg,
+  Ctx,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware
+} from 'type-graphql'
+import { CreatePostInput } from '../entities/CreatePostInput'
+import { checkAuth } from '../middleware/checkAuth'
 // import { sleep } from '../utils/sleep'
 
 @Resolver()
@@ -27,15 +37,15 @@ export class PostResolver {
   }
 
   @Mutation(_returns => Post)
+  @UseMiddleware(checkAuth)
   async createPost(
-    @Arg('title') title: string
-    // @Ctx() { em }: DbContext
+    @Arg('createPostInput') { title, text }: CreatePostInput,
+    @Ctx() { req }: DbContext
   ): Promise<Post> {
     // const post = em.create(Post, { title })
     // await em.persistAndFlush(post)
     // return post
-
-    const newPost = Post.create({ title })
+    const newPost = Post.create({ title, text, userId: req.session.userId })
     await newPost.save()
 
     return newPost

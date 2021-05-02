@@ -267,3 +267,7 @@ https://youtu.be/I6ypD7qv3Z8?t=19198
 TYPEORM 
 
 npm i typeorm 
+xoa folder dist di 
+
+dung pgAdmin tao db lireddit2
+Neu bi loi khi them cot: contain null values, thi vao db xoa het nhung record do di de typeorm lam lai tu dong 

@@ -5,9 +5,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  BaseEntity
+  BaseEntity,
+  OneToMany
 } from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
+import { Post } from './Post'
 
 @ObjectType() // graphql stuff
 @Entity() // db table
@@ -16,18 +18,6 @@ export class User extends BaseEntity {
   // @PrimaryKey() // column in db table, MikroORM style
   @PrimaryGeneratedColumn()
   id!: number
-
-  @Field()
-  // @Property() // MikroORM style
-  @CreateDateColumn()
-  // createdAt: Date = new Date() // no need to initialise when using typeorm
-  createdAt: Date
-
-  @Field()
-  // @Property({ onUpdate: () => new Date() }) // MikroORM style
-  @UpdateDateColumn()
-  // updatedAt: Date = new Date() // no need when using typeorm
-  updatedAt: Date
 
   @Field()
   // @Property({ type: 'text', unique: true }) // column // MikroORM style
@@ -43,4 +33,19 @@ export class User extends BaseEntity {
   // @Property({ type: 'text' }) // column // MikroORM style
   @Column()
   password!: string
+
+  @OneToMany(() => Post, post => post.user)
+  posts: Post[]
+
+  @Field()
+  // @Property() // MikroORM style
+  @CreateDateColumn()
+  // createdAt: Date = new Date() // no need to initialise when using typeorm
+  createdAt: Date
+
+  @Field()
+  // @Property({ onUpdate: () => new Date() }) // MikroORM style
+  @UpdateDateColumn()
+  // updatedAt: Date = new Date() // no need when using typeorm
+  updatedAt: Date
 }

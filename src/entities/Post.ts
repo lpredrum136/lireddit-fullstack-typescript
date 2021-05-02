@@ -5,9 +5,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  BaseEntity
+  BaseEntity,
+  ManyToOne
 } from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
+import { User } from './User'
 
 @ObjectType() // graphql stuff
 @Entity() // db table
@@ -16,6 +18,26 @@ export class Post extends BaseEntity {
   // @PrimaryKey() // column in db table, mikroORM style
   @PrimaryGeneratedColumn()
   id!: number
+
+  @Field()
+  // @Property({ type: 'text' }) // column, mikroORM style
+  @Column()
+  title!: string
+
+  @Field()
+  @Column()
+  text!: string
+
+  @Field()
+  @Column({ default: 0 }) // upvotes
+  points!: number
+
+  @Field({ nullable: true })
+  @Column()
+  userId: number
+
+  @ManyToOne(() => User, user => user.posts)
+  user: User
 
   @Field()
   // @Property() // mikroORM style
@@ -28,9 +50,4 @@ export class Post extends BaseEntity {
   @UpdateDateColumn()
   // updatedAt: Date = new Date() // no need when using typeORM
   updatedAt: Date
-
-  @Field()
-  // @Property({ type: 'text' }) // column, mikroORM style
-  @Column()
-  title!: string
 }
