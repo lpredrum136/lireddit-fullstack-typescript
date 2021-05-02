@@ -1,5 +1,6 @@
 import { DbContext } from '../types'
 import { MiddlewareFn } from 'type-graphql'
+import { AuthenticationError } from 'apollo-server-errors'
 
 // running before resolver
 export const checkAuth: MiddlewareFn<DbContext> = (
@@ -7,7 +8,9 @@ export const checkAuth: MiddlewareFn<DbContext> = (
   next
 ) => {
   if (!req.session.userId) {
-    throw new Error('Not authenticated to perform GraphQL operations')
+    throw new AuthenticationError(
+      'Not authenticated to perform GraphQL operations'
+    )
   }
 
   return next()

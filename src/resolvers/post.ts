@@ -3,15 +3,32 @@ import { DbContext } from '../types'
 import {
   Arg,
   Ctx,
+  Field,
   ID,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware
 } from 'type-graphql'
 import { CreatePostInput } from '../entities/CreatePostInput'
 import { checkAuth } from '../middleware/checkAuth'
+import { IMutationResponse } from '../entities/MutationResponse'
+import { FieldError } from '../entities/FieldError'
 // import { sleep } from '../utils/sleep'
+
+@ObjectType({ implements: IMutationResponse })
+class PostMutationResponse implements IMutationResponse {
+  code: number
+  success: boolean
+  message?: string
+
+  @Field({ nullable: true })
+  post?: Post
+
+  @Field(_type => [FieldError], { nullable: true })
+  errors?: FieldError[]
+}
 
 @Resolver()
 export class PostResolver {
@@ -36,19 +53,24 @@ export class PostResolver {
     return Post.findOne(id)
   }
 
-  @Mutation(_returns => Post)
+  @Mutation(_returns => PostMutationResponse)
   @UseMiddleware(checkAuth)
   async createPost(
     @Arg('createPostInput') { title, text }: CreatePostInput,
     @Ctx() { req }: DbContext
-  ): Promise<Post> {
+  ): Promise<PostMutationResponse> {
     // const post = em.create(Post, { title })
     // await em.persistAndFlush(post)
     // return post
     const newPost = Post.create({ title, text, userId: req.session.userId })
     await newPost.save()
 
-    return newPost
+    return {
+      code: 200,
+      success: true,
+      message: 'Post created successfully',
+      post: newPost
+    }
   }
 
   @Mutation(_returns => Post, { nullable: true })

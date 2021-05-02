@@ -25,7 +25,7 @@ import { User } from './entities/User'
 import { Post } from './entities/Post'
 
 const main = async () => {
-  const connection = await createConnection({
+  await createConnection({
     type: 'postgres',
     database: 'lireddit2',
     username: process.env.DB_USERNAME,
@@ -90,7 +90,7 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false
-    }),
+    }), // this is from typegraphql https://typegraphql.com/docs/bootstrap.html
     context: ({ req, res }): DbContext => ({
       // em: orm.em,
       req,
