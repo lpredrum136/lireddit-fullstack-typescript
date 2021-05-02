@@ -31,24 +31,27 @@ export type QueryPostArgs = {
 export type Post = {
   __typename?: 'Post';
   id: Scalars['ID'];
+  title: Scalars['String'];
+  text: Scalars['String'];
+  points: Scalars['Float'];
+  userId?: Maybe<Scalars['Float']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
-  title: Scalars['String'];
 };
 
 
 export type User = {
   __typename?: 'User';
   id: Scalars['ID'];
-  createdAt: Scalars['DateTime'];
-  updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
   email: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createPost: Post;
+  createPost: PostMutationResponse;
   updatePost?: Maybe<Post>;
   deletePost: Scalars['Boolean'];
   changePassword: UserMutationResponse;
@@ -60,7 +63,7 @@ export type Mutation = {
 
 
 export type MutationCreatePostArgs = {
-  title: Scalars['String'];
+  createPostInput: CreatePostInput;
 };
 
 
@@ -96,12 +99,12 @@ export type MutationLoginArgs = {
   loginInput: LoginInput;
 };
 
-export type UserMutationResponse = IMutationResponse & {
-  __typename?: 'UserMutationResponse';
+export type PostMutationResponse = IMutationResponse & {
+  __typename?: 'PostMutationResponse';
   code: Scalars['Float'];
   success: Scalars['Boolean'];
   message?: Maybe<Scalars['String']>;
-  user?: Maybe<User>;
+  post?: Maybe<Post>;
   errors?: Maybe<Array<FieldError>>;
 };
 
@@ -115,6 +118,20 @@ export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
   message: Scalars['String'];
+};
+
+export type CreatePostInput = {
+  title: Scalars['String'];
+  text: Scalars['String'];
+};
+
+export type UserMutationResponse = IMutationResponse & {
+  __typename?: 'UserMutationResponse';
+  code: Scalars['Float'];
+  success: Scalars['Boolean'];
+  message?: Maybe<Scalars['String']>;
+  user?: Maybe<User>;
+  errors?: Maybe<Array<FieldError>>;
 };
 
 export type ChangePasswordInput = {
@@ -136,9 +153,31 @@ export type LoginInput = {
   password: Scalars['String'];
 };
 
-export type MutationResponseStatusesFragment = (
+export type UserMutationResponseStatusesFragment = (
   { __typename?: 'UserMutationResponse' }
   & Pick<UserMutationResponse, 'code' | 'success' | 'message'>
+);
+
+export type PostMutationResponseStatusesFragment = (
+  { __typename?: 'PostMutationResponse' }
+  & Pick<PostMutationResponse, 'code' | 'success' | 'message'>
+);
+
+export type PostInfoFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'userId' | 'createdAt' | 'updatedAt'>
+);
+
+export type PostMutationResponseFragment = (
+  { __typename?: 'PostMutationResponse' }
+  & { post?: Maybe<(
+    { __typename?: 'Post' }
+    & PostInfoFragment
+  )>, errors?: Maybe<Array<(
+    { __typename?: 'FieldError' }
+    & RegularErrorFragment
+  )>> }
+  & PostMutationResponseStatusesFragment
 );
 
 export type RegularErrorFragment = (
@@ -160,7 +199,7 @@ export type UserMutationResponseFragment = (
     { __typename?: 'FieldError' }
     & RegularErrorFragment
   )>> }
-  & MutationResponseStatusesFragment
+  & UserMutationResponseStatusesFragment
 );
 
 export type ChangePasswordMutationVariables = Exact<{
@@ -175,6 +214,19 @@ export type ChangePasswordMutation = (
   & { changePassword: (
     { __typename?: 'UserMutationResponse' }
     & UserMutationResponseFragment
+  ) }
+);
+
+export type CreatePostMutationVariables = Exact<{
+  createPostInput: CreatePostInput;
+}>;
+
+
+export type CreatePostMutation = (
+  { __typename?: 'Mutation' }
+  & { createPost: (
+    { __typename?: 'PostMutationResponse' }
+    & PostMutationResponseFragment
   ) }
 );
 
@@ -244,8 +296,45 @@ export type PostsQuery = (
   )> }
 );
 
-export const MutationResponseStatusesFragmentDoc = gql`
-    fragment mutationResponseStatuses on UserMutationResponse {
+export const PostMutationResponseStatusesFragmentDoc = gql`
+    fragment postMutationResponseStatuses on PostMutationResponse {
+  code
+  success
+  message
+}
+    `;
+export const PostInfoFragmentDoc = gql`
+    fragment postInfo on Post {
+  id
+  title
+  text
+  points
+  userId
+  createdAt
+  updatedAt
+}
+    `;
+export const RegularErrorFragmentDoc = gql`
+    fragment regularError on FieldError {
+  field
+  message
+}
+    `;
+export const PostMutationResponseFragmentDoc = gql`
+    fragment postMutationResponse on PostMutationResponse {
+  ...postMutationResponseStatuses
+  post {
+    ...postInfo
+  }
+  errors {
+    ...regularError
+  }
+}
+    ${PostMutationResponseStatusesFragmentDoc}
+${PostInfoFragmentDoc}
+${RegularErrorFragmentDoc}`;
+export const UserMutationResponseStatusesFragmentDoc = gql`
+    fragment userMutationResponseStatuses on UserMutationResponse {
   code
   success
   message
@@ -257,15 +346,9 @@ export const UserInfoFragmentDoc = gql`
   username
 }
     `;
-export const RegularErrorFragmentDoc = gql`
-    fragment regularError on FieldError {
-  field
-  message
-}
-    `;
 export const UserMutationResponseFragmentDoc = gql`
     fragment userMutationResponse on UserMutationResponse {
-  ...mutationResponseStatuses
+  ...userMutationResponseStatuses
   user {
     ...userInfo
   }
@@ -273,7 +356,7 @@ export const UserMutationResponseFragmentDoc = gql`
     ...regularError
   }
 }
-    ${MutationResponseStatusesFragmentDoc}
+    ${UserMutationResponseStatusesFragmentDoc}
 ${UserInfoFragmentDoc}
 ${RegularErrorFragmentDoc}`;
 export const ChangePasswordDocument = gql`
@@ -314,6 +397,38 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreatePostDocument = gql`
+    mutation CreatePost($createPostInput: CreatePostInput!) {
+  createPost(createPostInput: $createPostInput) {
+    ...postMutationResponse
+  }
+}
+    ${PostMutationResponseFragmentDoc}`;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      createPostInput: // value for 'createPostInput'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, baseOptions);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($forgotPasswordInput: ForgotPasswordInput!) {
   forgotPassword(forgotPasswordInput: $forgotPasswordInput)

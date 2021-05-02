@@ -1,4 +1,10 @@
-fragment mutationResponseStatuses on UserMutationResponse {
+fragment userMutationResponseStatuses on UserMutationResponse {
+  code
+  success
+  message
+}
+
+fragment postMutationResponseStatuses on PostMutationResponse {
   code
   success
   message

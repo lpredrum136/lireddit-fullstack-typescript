@@ -1,12 +1,13 @@
 import { Box } from '@chakra-ui/react'
 import { ReactNode } from 'react'
+import { WrapperVariant } from './Layout'
 
 interface IWrapperProps {
   children: ReactNode
-  variant?: 'small' | 'regular'
+  variant?: WrapperVariant
 }
 
-const Wrapper = ({ children, variant = 'regular' }: IWrapperProps) => {
+const Wrapper = ({ children, variant }: IWrapperProps) => {
   return (
     <Box
       maxW={variant === 'regular' ? '800px' : '400px'}

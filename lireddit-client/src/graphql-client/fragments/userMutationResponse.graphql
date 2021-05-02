@@ -1,5 +1,5 @@
 fragment userMutationResponse on UserMutationResponse {
-  ...mutationResponseStatuses
+  ...userMutationResponseStatuses
   user {
     ...userInfo
   }
