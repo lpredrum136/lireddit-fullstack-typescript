@@ -33,7 +33,7 @@ const ChangePassword = ({
     { setErrors }: FormikHelpers<ChangePasswordInput>
   ) => {
     const response = await changeUserPassword({
-      variables: { token, changePasswordInput: values, userId }
+      variables: { token, changePasswordInput: values, userId } // ACTUALLY here we can get token from router.query.token, so you don't have to destructure it out from props
     })
 
     if (response.data?.changePassword.errors) {
@@ -85,6 +85,8 @@ const ChangePassword = ({
 
 // Phai viet day du kieu nay thi o ben tren phan const ChangePassword({token}) thi token o do moi la dang string
 // No SSR for this page
+
+// Neu su dung router de lay token va userId ra tu URL thi toan bo phan nay k can
 export const getServerSideProps: GetServerSideProps<{
   token: string
   userId: string

@@ -5,8 +5,10 @@ import Layout from '../components/Layout'
 import { Link } from '@chakra-ui/react'
 import NextLink from 'next/link'
 
+const limit = 2 // number of posts to get from backend
+
 const Index = () => {
-  const { data } = usePostsQuery()
+  const { data } = usePostsQuery({ variables: { limit } })
 
   return (
     <Layout>
@@ -27,7 +29,7 @@ const Index = () => {
 export const getStaticProps: GetStaticProps = async () => {
   const apolloClient = initialiseApollo()
 
-  await apolloClient.query({ query: PostsDocument })
+  await apolloClient.query({ query: PostsDocument, variables: { limit } })
 
   return addApolloState(apolloClient, { props: {} })
 }
