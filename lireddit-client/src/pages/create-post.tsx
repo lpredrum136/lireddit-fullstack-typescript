@@ -1,29 +1,20 @@
 import { Box, Button } from '@chakra-ui/react'
 import { Formik, Form, FormikHelpers } from 'formik'
 import InputField from '../components/InputField'
-import {
-  CreatePostInput,
-  useCreatePostMutation,
-  useMeQuery
-} from '../generated/graphql'
+import { CreatePostInput, useCreatePostMutation } from '../generated/graphql'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
-import { useEffect } from 'react'
+import { useCheckAuth } from '../utils/useCheckAuth'
 
 const CreatePost = () => {
   // Router Next
   const router = useRouter()
 
+  // Protect route and redirect
+  const { data, loading } = useCheckAuth()
+
   // GraphQL
   const [createPost, _] = useCreatePostMutation()
-
-  // Protect route
-  const { data, loading } = useMeQuery() // under the hood, this is checking in the graphql cache, so you don't waste resource making http request to server
-  useEffect(() => {
-    if (!loading && !data?.me) {
-      router.replace('/login')
-    }
-  }, [data, loading, router])
 
   // Formik
   const initialValues = { title: '', text: '' }
