@@ -1,5 +1,6 @@
 import {
   ApolloClient,
+  from,
   HttpLink,
   InMemoryCache,
   NormalizedCacheObject
@@ -7,18 +8,32 @@ import {
 import { useMemo } from 'react'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
+import { onError } from '@apollo/client/link/error'
+import Router from 'next/router' // using router outside page component: https://stackoverflow.com/questions/55182529/next-js-router-push-with-state
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
 let apolloClient: ApolloClient<NormalizedCacheObject>
 
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+  credentials: 'include'
+})
+
+// use global error handling to avoid having to deal with authenticated graphql calls every place we call it
+const errorLink = onError(errors => {
+  if (
+    errors.graphQLErrors &&
+    errors.graphQLErrors[0].extensions?.code === 'UNAUTHENTICATED'
+  ) {
+    Router.replace('/login')
+  }
+})
+
 const createApolloClient = () => {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: new HttpLink({
-      uri: 'http://localhost:4000/graphql',
-      credentials: 'include'
-    }),
+    link: from([errorLink, httpLink]),
     cache: new InMemoryCache()
     // Enable sending cookies over cross-origin requests
     // credentials: 'include'
