@@ -271,3 +271,39 @@ xoa folder dist di
 
 dung pgAdmin tao db lireddit2
 Neu bi loi khi them cot: contain null values, thi vao db xoa het nhung record do di de typeorm lam lai tu dong 
+
+TAO 1000 db rows 
+https://www.mockaroo.com/
+Download data ve, nho la userId phai de trong "", i.e. "userId", roi dung pgAdmin de them vao db
+
+hoac tu tao migration, cd vao server, sau do:
+npx typeorm migration:create -n FakePosts
+se tao ra template, dua file migration nay vao folder src/migrations (server)
+neu k co folder migrations thi tu tao ra, sau do xoa nhung migrations cu tu mikroorm di
+dong thoi xoa dong migrations cu trong dist folder di
+
+chinh thanh 
+public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            
+        `)
+    }
+
+    roi dien dong sql vao giua ` `
+
+Sau do: index.ts
+  import path from 'path'
+
+  const main = async () => {
+    const connection = await createConnection({
+      type: 'postgres',
+      database: 'lireddit2',
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      logging: true,
+      synchronize: true, // tao db ngay tu khi khoi dong
+      entities: [Post, User],
+      migrations: [path.join(__dirname, '/migrations/*')]
+    })
+
+    await connection.runMigrations()

@@ -23,6 +23,7 @@ import connectMongo from 'connect-mongo'
 import { createConnection } from 'typeorm'
 import { User } from './entities/User'
 import { Post } from './entities/Post'
+import path from 'path'
 
 const main = async () => {
   const connection = await createConnection({
@@ -32,8 +33,11 @@ const main = async () => {
     password: process.env.DB_PASSWORD,
     logging: true,
     synchronize: true, // tao db ngay tu khi khoi dong
-    entities: [Post, User]
+    entities: [Post, User],
+    migrations: [path.join(__dirname, '/migrations/*')]
   })
+
+  await connection.runMigrations()
 
   // sendEmail('lpredrum136@gmail.com', 'hi henry') // after you send this, get the console log username and password and hardcode it in sendEmail.ts
 

@@ -1,10 +1,11 @@
-import { Box, Button } from '@chakra-ui/react'
+import { Box, Button, Link } from '@chakra-ui/react'
 import { Formik, Form, FormikHelpers } from 'formik'
 import InputField from '../components/InputField'
 import { CreatePostInput, useCreatePostMutation } from '../generated/graphql'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import { useCheckAuth } from '../utils/useCheckAuth'
+import NextLink from 'next/link'
 
 const CreatePost = () => {
   // Router Next
@@ -68,6 +69,9 @@ const CreatePost = () => {
             </Form>
           )}
         </Formik>
+        <NextLink href="/">
+          <Link>Go back to homepage</Link>
+        </NextLink>
       </Layout>
     )
   }
