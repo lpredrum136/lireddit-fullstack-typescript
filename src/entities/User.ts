@@ -39,13 +39,13 @@ export class User extends BaseEntity {
 
   @Field()
   // @Property() // MikroORM style
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   // createdAt: Date = new Date() // no need to initialise when using typeorm
   createdAt: Date
 
   @Field()
   // @Property({ onUpdate: () => new Date() }) // MikroORM style
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   // updatedAt: Date = new Date() // no need when using typeorm
   updatedAt: Date
 }

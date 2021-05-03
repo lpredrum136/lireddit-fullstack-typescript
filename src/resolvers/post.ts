@@ -5,6 +5,7 @@ import {
   Ctx,
   Field,
   ID,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -33,15 +34,34 @@ class PostMutationResponse implements IMutationResponse {
 @Resolver()
 export class PostResolver {
   @Query(_returns => [Post]) // _ is to bypass unused variable error
-  async posts(/* @Ctx() { em }: DbContext */): Promise<Post[]> {
+  async posts(
+    @Arg('limit', _type => Int) limit: number,
+    @Ctx() { /* em */ connection }: DbContext,
+    @Arg('cursor', { nullable: true }) cursor?: string
+  ): Promise<Post[]> {
+    // MikroORM
     // explicitly declare return type here so if you "return 5" it will yell error
     // return 5
-
     // Fake slow loading
     // await sleep(3000)
-
     // return ctx.em.find(Post, {})
-    return Post.find()
+
+    // TypeORM
+    // return Post.find()
+
+    // TypeORM with pagination
+    const realLimit = Math.min(50, limit) // cap limit at 50
+    const query = await connection
+      .getRepository(Post)
+      .createQueryBuilder('post')
+      .orderBy('"createdAt"', 'DESC') // need quotation for postgresql
+      .take(realLimit)
+
+    if (cursor) {
+      query.where('"createdAt" < :cursor', { cursor }) // from the cursor time point going backward in time
+    }
+
+    return query.getMany()
   }
 
   @Query(_returns => Post, { nullable: true })

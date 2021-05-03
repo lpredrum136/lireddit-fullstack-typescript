@@ -25,7 +25,7 @@ import { User } from './entities/User'
 import { Post } from './entities/Post'
 
 const main = async () => {
-  await createConnection({
+  const connection = await createConnection({
     type: 'postgres',
     database: 'lireddit2',
     username: process.env.DB_USERNAME,
@@ -90,11 +90,13 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false
+      // dateScalarMode: 'timestamp' // if you want time in epoch seconds
     }), // this is from typegraphql https://typegraphql.com/docs/bootstrap.html
     context: ({ req, res }): DbContext => ({
       // em: orm.em,
       req,
-      res
+      res,
+      connection // typeorm connection to be used in resolvers
     }) // to send Post type to the resolver
   })
 
