@@ -96,7 +96,9 @@ const Login = () => {
       setErrors(toErrorMap(response.data.login.errors))
     } else if (response.data?.login.user) {
       // login successful
-      router.push('/')
+      router.push(
+        typeof router.query.redirect === 'string' ? router.query.redirect : '/'
+      )
     }
   }
 
