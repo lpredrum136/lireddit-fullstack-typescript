@@ -37,7 +37,7 @@ const main = async () => {
     migrations: [path.join(__dirname, '/migrations/*')]
   })
 
-  await connection.runMigrations()
+  // await connection.runMigrations() // this was run once to insert 100 rows in post table
 
   // sendEmail('lpredrum136@gmail.com', 'hi henry') // after you send this, get the console log username and password and hardcode it in sendEmail.ts
 
