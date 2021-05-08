@@ -83,7 +83,7 @@ export class PostResolver {
     const posts = await paginatedPostsQuery.getMany()
     return {
       totalCount: totalPostCount,
-      cursor: cursor ? posts[posts.length - 1].createdAt : null,
+      cursor: posts[posts.length - 1].createdAt,
       hasMore: cursor
         ? posts[posts.length - 1].createdAt.toString() !==
           lastPaginatedPost?.createdAt.toString() // toString because if compared originally, it doesn't return correct result, even though console.log() outputs the same

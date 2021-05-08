@@ -10,6 +10,8 @@ import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { onError } from '@apollo/client/link/error'
 import Router from 'next/router' // using router outside page component: https://stackoverflow.com/questions/55182529/next-js-router-push-with-state
+import { Post } from '../generated/graphql'
+// import { concatPagination } from '@apollo/client/utilities'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -34,7 +36,39 @@ const createApolloClient = () => {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([errorLink, httpLink]),
-    cache: new InMemoryCache()
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            posts: {
+              keyArgs: false,
+              merge(existing, incoming) {
+                let paginatedPosts: Post[] = []
+                console.log('EXISTING', existing)
+                console.log('INCOMING', incoming)
+
+                if (existing && existing.paginatedPosts) {
+                  paginatedPosts = paginatedPosts.concat(
+                    existing.paginatedPosts
+                  )
+                }
+
+                if (incoming && incoming.paginatedPosts) {
+                  paginatedPosts = paginatedPosts.concat(
+                    incoming.paginatedPosts
+                  )
+                }
+
+                return {
+                  ...incoming,
+                  paginatedPosts
+                }
+              }
+            }
+          }
+        }
+      }
+    })
     // Enable sending cookies over cross-origin requests
     // credentials: 'include'
   })

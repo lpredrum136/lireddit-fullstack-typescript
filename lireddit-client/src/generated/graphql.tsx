@@ -18,7 +18,7 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   hello: Scalars['String'];
-  posts: Array<Post>;
+  posts: PaginatedPosts;
   post?: Maybe<Post>;
   me?: Maybe<User>;
 };
@@ -34,6 +34,15 @@ export type QueryPostArgs = {
   id: Scalars['ID'];
 };
 
+export type PaginatedPosts = {
+  __typename?: 'PaginatedPosts';
+  totalCount: Scalars['Float'];
+  cursor?: Maybe<Scalars['DateTime']>;
+  hasMore: Scalars['Boolean'];
+  paginatedPosts: Array<Post>;
+};
+
+
 export type Post = {
   __typename?: 'Post';
   id: Scalars['ID'];
@@ -45,7 +54,6 @@ export type Post = {
   updatedAt: Scalars['DateTime'];
   textSnippet: Scalars['String'];
 };
-
 
 export type User = {
   __typename?: 'User';
@@ -300,10 +308,14 @@ export type PostsQueryVariables = Exact<{
 
 export type PostsQuery = (
   { __typename?: 'Query' }
-  & { posts: Array<(
-    { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet'>
-  )> }
+  & { posts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'totalCount' | 'cursor' | 'hasMore'>
+    & { paginatedPosts: Array<(
+      { __typename?: 'Post' }
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet'>
+    )> }
+  ) }
 );
 
 export const PostMutationResponseStatusesFragmentDoc = gql`
@@ -597,11 +609,16 @@ export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
     query Posts($limit: Int!, $cursor: String) {
   posts(limit: $limit, cursor: $cursor) {
-    id
-    createdAt
-    updatedAt
-    title
-    textSnippet
+    totalCount
+    cursor
+    hasMore
+    paginatedPosts {
+      id
+      createdAt
+      updatedAt
+      title
+      textSnippet
+    }
   }
 }
     `;
