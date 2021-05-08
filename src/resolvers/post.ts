@@ -4,18 +4,21 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   ID,
   Int,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
   UseMiddleware
 } from 'type-graphql'
 import { CreatePostInput } from '../entities/CreatePostInput'
 import { checkAuth } from '../middleware/checkAuth'
 import { IMutationResponse } from '../entities/MutationResponse'
 import { FieldError } from '../entities/FieldError'
+import { PaginatedPosts } from '../entities/PaginatedPosts'
 // import { sleep } from '../utils/sleep'
 
 @ObjectType({ implements: IMutationResponse })
@@ -31,14 +34,20 @@ class PostMutationResponse implements IMutationResponse {
   errors?: FieldError[]
 }
 
-@Resolver()
+@Resolver(_of => Post) // Only when we have FieldResolver, in which case we are explicitly saying we are trying to resolve Post type
 export class PostResolver {
-  @Query(_returns => [Post]) // _ is to bypass unused variable error
+  // Field Resolver
+  @FieldResolver(_returns => String) // sometimes typegraphql just complains it cannot infer the type :(
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50)
+  }
+
+  @Query(_returns => PaginatedPosts) // _ is to bypass unused variable error
   async posts(
     @Arg('limit', _type => Int) limit: number,
     @Ctx() { /* em */ connection }: DbContext,
     @Arg('cursor', { nullable: true }) cursor?: string
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     // MikroORM
     // explicitly declare return type here so if you "return 5" it will yell error
     // return 5
@@ -50,18 +59,37 @@ export class PostResolver {
     // return Post.find()
 
     // TypeORM with pagination
+    const totalPostCount = await Post.count()
+
     const realLimit = Math.min(50, limit) // cap limit at 50
-    const query = await connection
+    const paginatedPostsQuery = connection
       .getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('"createdAt"', 'DESC') // need quotation for postgresql
       .take(realLimit)
 
+    // Deal with cursor
+    let lastPaginatedPost: Post | undefined
     if (cursor) {
-      query.where('"createdAt" < :cursor', { cursor }) // from the cursor time point going backward in time
+      paginatedPostsQuery.where('"createdAt" < :cursor', { cursor }) // from the cursor time point going backward in time
+      lastPaginatedPost = await connection
+        .getRepository(Post)
+        .createQueryBuilder('post')
+        .orderBy('"createdAt"', 'ASC')
+        .take(1)
+        .getOne()
     }
 
-    return query.getMany()
+    const posts = await paginatedPostsQuery.getMany()
+    return {
+      totalCount: totalPostCount,
+      cursor: cursor ? posts[posts.length - 1].createdAt : null,
+      hasMore: cursor
+        ? posts[posts.length - 1].createdAt.toString() !==
+          lastPaginatedPost?.createdAt.toString() // toString because if compared originally, it doesn't return correct result, even though console.log() outputs the same
+        : posts.length !== totalPostCount,
+      paginatedPosts: posts
+    }
   }
 
   @Query(_returns => Post, { nullable: true })
