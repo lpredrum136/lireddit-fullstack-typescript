@@ -36,6 +36,7 @@ export class Post extends BaseEntity {
   @Column()
   userId: number
 
+  @Field() // grab real user when resolver for this runs
   @ManyToOne(() => User, user => user.posts)
   user: User
 

@@ -19,6 +19,7 @@ import { checkAuth } from '../middleware/checkAuth'
 import { IMutationResponse } from '../entities/MutationResponse'
 import { FieldError } from '../entities/FieldError'
 import { PaginatedPosts } from '../entities/PaginatedPosts'
+import { User } from '../entities/User'
 // import { sleep } from '../utils/sleep'
 
 @ObjectType({ implements: IMutationResponse })
@@ -40,6 +41,12 @@ export class PostResolver {
   @FieldResolver(_returns => String) // sometimes typegraphql just complains it cannot infer the type :(
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50)
+  }
+
+  // return real User to user field of type Post
+  @FieldResolver(_returns => User)
+  async user(@Root() root: Post) {
+    return await User.findOne(root.userId)
   }
 
   @Query(_returns => PaginatedPosts) // _ is to bypass unused variable error
@@ -81,6 +88,10 @@ export class PostResolver {
     }
 
     const posts = await paginatedPostsQuery.getMany()
+
+    // Cach khac de xac dinh hasMore la lay them +1 vao realLimit, tuc la luon luon query them 1 post, khi do
+    // paginatedPosts: posts.slice (0, realLimit)
+    // hasMore se la posts.length !== realLimit
     return {
       totalCount: totalPostCount,
       cursor: posts[posts.length - 1].createdAt,
