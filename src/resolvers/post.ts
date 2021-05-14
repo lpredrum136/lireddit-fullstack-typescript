@@ -45,8 +45,8 @@ export class PostResolver {
 
   // return real User to user field of type Post
   @FieldResolver(_returns => User)
-  async user(@Root() root: Post) {
-    return await User.findOne(root.userId)
+  async user(@Root() rootPostResult: Post) {
+    return await User.findOne(rootPostResult.userId)
   }
 
   @Query(_returns => PaginatedPosts) // _ is to bypass unused variable error

@@ -3,10 +3,12 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   Mutation,
   ObjectType,
   Query,
-  Resolver
+  Resolver,
+  Root
 } from 'type-graphql'
 import { User } from '../entities/User'
 import argon2 from 'argon2'
@@ -35,8 +37,20 @@ class UserMutationResponse implements IMutationResponse {
   errors?: FieldError[]
 }
 
-@Resolver()
+@Resolver(_of => User)
 export class UserResolver {
+  // Protect user email address when queried by another user
+  @FieldResolver(_returns => String)
+  email(@Root() user: User, @Ctx() { req }: DbContext) {
+    // this is the current user and it's ok to show them their own email
+    if (req.session.userId === user.id) {
+      return user.email
+    }
+
+    // current user wants to see someone else's email
+    return ''
+  }
+
   // Change password
   @Mutation(_returns => UserMutationResponse)
   async changePassword(
@@ -181,7 +195,7 @@ export class UserResolver {
     @Ctx() { /* em, */ req }: DbContext
   ): Promise<User | undefined | null> {
     // You are not logged in
-    console.log(req.session)
+    console.log(req.session.userId)
     if (!req.session.userId) return null
 
     // const user = await em.findOne(User, { id: req.session.userId })
@@ -292,6 +306,7 @@ export class UserResolver {
     // Login successful here is the thing I want to store in session
     // and all requests will have this req.session.userId so that I know what user is requesting
     // see more in devnotes.txt
+    console.log(user.id)
     req.session.userId = user.id // you can stick more data here if you want to, anything that doesn't change and unique to a user
 
     // User found and password correct
