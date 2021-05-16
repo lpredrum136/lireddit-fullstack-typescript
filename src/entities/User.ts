@@ -7,9 +7,12 @@ import {
   UpdateDateColumn,
   BaseEntity,
   OneToMany
+  // ManyToMany,
+  // JoinTable
 } from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
 import { Post } from './Post'
+import { Upvote } from './Upvote'
 
 @ObjectType() // graphql stuff
 @Entity() // db table
@@ -36,6 +39,15 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Post, post => post.user)
   posts: Post[]
+
+  @OneToMany(_to => Upvote, upvote => upvote.user)
+  upvotes: Upvote[]
+
+  // K lam the nay duoc theo https://typeorm.io/#/many-to-many-relations
+  // vi joined table can co them field, vi du, xem Upvote.ts, co them field value
+  // @ManyToMany(_to => Post)
+  // @JoinTable()
+  // upvotedPosts: Post[]
 
   @Field()
   // @Property() // MikroORM style

@@ -24,6 +24,7 @@ import { createConnection } from 'typeorm'
 import { User } from './entities/User'
 import { Post } from './entities/Post'
 import path from 'path'
+import { Upvote } from './entities/Upvote'
 
 const main = async () => {
   const connection = await createConnection({
@@ -33,7 +34,7 @@ const main = async () => {
     password: process.env.DB_PASSWORD,
     logging: true,
     synchronize: true, // tao db ngay tu khi khoi dong
-    entities: [Post, User],
+    entities: [Post, User, Upvote],
     migrations: [path.join(__dirname, '/migrations/*')]
   })
 

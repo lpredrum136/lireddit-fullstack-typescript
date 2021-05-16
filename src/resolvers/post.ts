@@ -20,6 +20,8 @@ import { IMutationResponse } from '../entities/MutationResponse'
 import { FieldError } from '../entities/FieldError'
 import { PaginatedPosts } from '../entities/PaginatedPosts'
 import { User } from '../entities/User'
+import { Upvote } from '../entities/Upvote'
+import { UserInputError } from 'apollo-server-errors'
 // import { sleep } from '../utils/sleep'
 
 @ObjectType({ implements: IMutationResponse })
@@ -132,12 +134,13 @@ export class PostResolver {
     }
   }
 
-  @Mutation(_returns => Post, { nullable: true })
+  @Mutation(_returns => PostMutationResponse, { nullable: true })
+  @UseMiddleware(checkAuth)
   async updatePost(
     // @Ctx() { em }: DbContext,
     @Arg('id', _type => ID) id: number,
     @Arg('title', { nullable: true }) title?: string
-  ): Promise<Post | null> {
+  ): Promise<PostMutationResponse> {
     // mikroORM style
     // const post = await em.findOne(Post, { id })
     // if (!post) return null
@@ -151,23 +154,74 @@ export class PostResolver {
     // return post
 
     let post = await Post.findOne(id)
-    if (!post) return null
+    if (!post)
+      return {
+        code: 400,
+        success: false,
+        message: 'Post not found'
+      }
 
+    // or cach 2. post.title = title roi await post.save()
     if (typeof title !== 'undefined') {
       await Post.update({ id }, { title })
       post.title = title
     }
 
-    return post
+    return {
+      code: 200,
+      success: true,
+      message: 'Post updated successfully',
+      post
+    }
   }
 
-  @Mutation(_returns => Boolean)
+  @Mutation(_returns => PostMutationResponse)
+  @UseMiddleware(checkAuth)
   async deletePost(
     // @Ctx() { em }: DbContext,
     @Arg('id', _type => ID) id: number
-  ): Promise<boolean> {
+  ): Promise<PostMutationResponse> {
     // await em.nativeDelete(Post, { id })
     await Post.delete(id)
-    return true
+    return {
+      code: 200,
+      success: true,
+      message: 'Post deleted successfully'
+    }
+  }
+
+  @Mutation(_returns => PostMutationResponse)
+  @UseMiddleware(checkAuth)
+  async vote(
+    @Arg('postId') postId: number,
+    @Arg('value') value: number,
+    @Ctx() { req, connection }: DbContext
+  ): Promise<PostMutationResponse> {
+    return await connection.transaction(async transactionalEntityManager => {
+      const realValue = value !== -1 ? 1 : -1
+      const { userId } = req.session
+      const newVote = transactionalEntityManager.create(Upvote, {
+        userId,
+        postId,
+        value: realValue
+      })
+      await transactionalEntityManager.save(newVote)
+
+      let post = await transactionalEntityManager.findOne(Post, postId)
+      if (!post) {
+        throw new UserInputError('Post not found')
+      }
+
+      post.points = post.points + realValue
+
+      post = await transactionalEntityManager.save(post)
+
+      return {
+        code: 200,
+        success: true,
+        message: 'Post voted',
+        post
+      }
+    })
   }
 }

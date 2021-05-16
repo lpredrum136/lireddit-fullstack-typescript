@@ -6,10 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
-  ManyToOne
+  ManyToOne,
+  OneToMany
 } from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
 import { User } from './User'
+import { Upvote } from './Upvote'
 
 @ObjectType() // graphql stuff
 @Entity() // db table
@@ -39,6 +41,9 @@ export class Post extends BaseEntity {
   @Field() // grab real user when resolver for this runs
   @ManyToOne(() => User, user => user.posts)
   user: User
+
+  @OneToMany(_to => Upvote, upvote => upvote.post)
+  upvotes: Upvote[]
 
   @Field()
   // @Property() // mikroORM style
