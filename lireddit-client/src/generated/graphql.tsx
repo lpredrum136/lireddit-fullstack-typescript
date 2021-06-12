@@ -50,6 +50,7 @@ export type Post = {
   text: Scalars['String'];
   points: Scalars['Float'];
   userId?: Maybe<Scalars['Float']>;
+  user: User;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   textSnippet: Scalars['String'];
@@ -67,8 +68,9 @@ export type User = {
 export type Mutation = {
   __typename?: 'Mutation';
   createPost: PostMutationResponse;
-  updatePost?: Maybe<Post>;
-  deletePost: Scalars['Boolean'];
+  updatePost?: Maybe<PostMutationResponse>;
+  deletePost: PostMutationResponse;
+  vote: PostMutationResponse;
   changePassword: UserMutationResponse;
   forgotPassword: Scalars['Boolean'];
   register: UserMutationResponse;
@@ -90,6 +92,12 @@ export type MutationUpdatePostArgs = {
 
 export type MutationDeletePostArgs = {
   id: Scalars['ID'];
+};
+
+
+export type MutationVoteArgs = {
+  value: Scalars['Float'];
+  postId: Scalars['Float'];
 };
 
 
@@ -180,13 +188,17 @@ export type PostMutationResponseStatusesFragment = (
 
 export type PostInfoFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'userId' | 'createdAt' | 'updatedAt'>
+  & Pick<Post, 'id' | 'points' | 'userId' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet'>
 );
 
 export type PostMutationResponseFragment = (
   { __typename?: 'PostMutationResponse' }
   & { post?: Maybe<(
     { __typename?: 'Post' }
+    & { user: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'username'>
+    ) }
     & PostInfoFragment
   )>, errors?: Maybe<Array<(
     { __typename?: 'FieldError' }
@@ -313,7 +325,11 @@ export type PostsQuery = (
     & Pick<PaginatedPosts, 'totalCount' | 'cursor' | 'hasMore'>
     & { paginatedPosts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet'>
+      & { user: (
+        { __typename?: 'User' }
+        & UserInfoFragment
+      ) }
+      & PostInfoFragment
     )> }
   ) }
 );
@@ -328,12 +344,12 @@ export const PostMutationResponseStatusesFragmentDoc = gql`
 export const PostInfoFragmentDoc = gql`
     fragment postInfo on Post {
   id
-  title
-  text
   points
   userId
   createdAt
   updatedAt
+  title
+  textSnippet
 }
     `;
 export const RegularErrorFragmentDoc = gql`
@@ -347,6 +363,10 @@ export const PostMutationResponseFragmentDoc = gql`
   ...postMutationResponseStatuses
   post {
     ...postInfo
+    user {
+      id
+      username
+    }
   }
   errors {
     ...regularError
@@ -613,15 +633,15 @@ export const PostsDocument = gql`
     cursor
     hasMore
     paginatedPosts {
-      id
-      createdAt
-      updatedAt
-      title
-      textSnippet
+      ...postInfo
+      user {
+        ...userInfo
+      }
     }
   }
 }
-    `;
+    ${PostInfoFragmentDoc}
+${UserInfoFragmentDoc}`;
 
 /**
  * __usePostsQuery__

@@ -2,6 +2,9 @@ fragment postMutationResponse on PostMutationResponse {
   ...postMutationResponseStatuses
   post {
     ...postInfo
+    user {
+      ...userInfo
+    }
   }
   errors {
     ...regularError

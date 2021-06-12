@@ -12,6 +12,7 @@ import { onError } from '@apollo/client/link/error'
 import Router from 'next/router' // using router outside page component: https://stackoverflow.com/questions/55182529/next-js-router-push-with-state
 import { Post } from '../generated/graphql'
 // import { concatPagination } from '@apollo/client/utilities'
+import { DateTime } from 'luxon'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -32,18 +33,47 @@ const errorLink = onError(errors => {
   }
 })
 
-const createApolloClient = () => {
-  return new ApolloClient({
+const createApolloClient = () =>
+  new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([errorLink, httpLink]),
     cache: new InMemoryCache({
       typePolicies: {
+        // PaginatedPosts: {
+        //   fields: {
+        //     paginatedPosts: {
+        //       keyArgs: false,
+        //       merge(existing, incoming, { args }) {
+        //         console.log('PAGINATED POSTS EXISTING', existing)
+        //         console.log('PAGINATED POSTS INCOMING', incoming)
+        //         console.log('PAGINATED POSTS ARGS', args)
+        //         return incoming.slice(0, 2)
+        //       }
+        //     }
+        //   }
+        // },
         Query: {
           fields: {
             posts: {
               keyArgs: false,
-              merge(existing, incoming) {
+
+              // OR YOU CAN USE READ WITH LUXON TO SORT THE POSTS HERE
+              // read(existing, { args }) {
+              //   if (existing) {
+              //     console.log('ARGS', args)
+              //     console.log('READ EXISTING', existing)
+              //     return {
+              //       ...existing,
+              //       paginatedPosts: existing.paginatedPosts.slice(
+              //         0,
+              //         existing.paginatedPosts.length - 1
+              //       )
+              //     }
+              //   }
+              // },
+              merge(existing, incoming, { args }) {
                 let paginatedPosts: Post[] = []
+                console.log('ARGS', args)
                 console.log('EXISTING', existing)
                 console.log('INCOMING', incoming)
 
@@ -53,16 +83,24 @@ const createApolloClient = () => {
                   )
                 }
 
-                if (incoming && incoming.paginatedPosts) {
+                // this is the only way it works :(
+                if (
+                  incoming &&
+                  incoming.paginatedPosts &&
+                  Array.isArray(incoming.paginatedPosts)
+                ) {
                   paginatedPosts = paginatedPosts.concat(
                     incoming.paginatedPosts
                   )
+                } else {
+                  paginatedPosts.unshift(incoming.paginatedPosts)
                 }
 
-                return {
-                  ...incoming,
-                  paginatedPosts
-                }
+                console.log('PAGINATED POSTS', paginatedPosts)
+
+                console.log('MERGE', { ...incoming, paginatedPosts })
+
+                return { ...incoming, paginatedPosts }
               }
             }
           }
@@ -72,7 +110,6 @@ const createApolloClient = () => {
     // Enable sending cookies over cross-origin requests
     // credentials: 'include'
   })
-}
 
 export const initialiseApollo = (initialState: object | null = null) => {
   const _apolloClient = apolloClient ?? createApolloClient()
@@ -80,8 +117,10 @@ export const initialiseApollo = (initialState: object | null = null) => {
   // If your page has Next.js data fetching methods that use Apollo Client,
   // the initial state gets hydrated here
   if (initialState) {
+    console.log('INITIAL STATE', initialState)
     // Get existing cache, loaded during client side data fetching
     const existingCache = _apolloClient.extract()
+    console.log('EXISTING CACHE', existingCache)
 
     // Restore the cache using the data passed from
     // getStaticProps/getServerSideProps combined with the existing cached data
@@ -115,6 +154,7 @@ export const addApolloState = <T extends { props?: IApolloStateProps }>(
   client: ApolloClient<NormalizedCacheObject>,
   pageProps: T
 ) => {
+  console.log('PAGEPROPS', pageProps)
   if (pageProps.props) {
     pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract()
   }
@@ -122,6 +162,7 @@ export const addApolloState = <T extends { props?: IApolloStateProps }>(
 }
 
 export const useApollo = (pageProps: IApolloStateProps) => {
+  console.log('USEAPOLLO PAGEPROPS', pageProps)
   const state = pageProps[APOLLO_STATE_PROP_NAME]
   const store = useMemo(() => initialiseApollo(state), [state])
   return store

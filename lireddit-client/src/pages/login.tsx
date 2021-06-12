@@ -104,10 +104,8 @@ const Login = () => {
 
   // GraphQL operations
 
-  const [
-    loginUser,
-    { loading: _loginUserMutationLoading, error, data }
-  ] = useLoginUserMutation() // custom hook created by graphql codegen
+  const [loginUser, { loading: _loginUserMutationLoading, error, data }] =
+    useLoginUserMutation() // custom hook created by graphql codegen
   // error here is server error, kinda like you have a typo somewhere
   // data is real structured data returned from GraphQL server (if you didn't make any typo)
 
