@@ -200,21 +200,50 @@ export class PostResolver {
     return await connection.transaction(async transactionalEntityManager => {
       const realValue = value !== -1 ? 1 : -1
       const { userId } = req.session
-      const newVote = transactionalEntityManager.create(Upvote, {
-        userId,
-        postId,
-        value: realValue
-      })
-      await transactionalEntityManager.save(newVote)
 
+      // find the post that needs its points changed
       let post = await transactionalEntityManager.findOne(Post, postId)
       if (!post) {
         throw new UserInputError('Post not found')
       }
 
-      post.points = post.points + realValue
+      // check if user has voted or not
+      const existingVote = await transactionalEntityManager.findOne(Upvote, {
+        postId,
+        userId
+      })
 
-      post = await transactionalEntityManager.save(post)
+      // change from upvote to downvote or vice versa
+
+      if (existingVote && existingVote.value !== realValue) {
+        console.log('HERE')
+        // update value 1 to -1 and vice versa
+        await transactionalEntityManager.save(Upvote, {
+          ...existingVote,
+          value: realValue
+        })
+
+        // save() cach 1
+        post = await transactionalEntityManager.save(Post, {
+          ...post,
+          points: post.points + 2 * realValue // remove one upvote, and add one downvote, so doubled!
+        })
+      }
+
+      // never voted before
+      if (!existingVote) {
+        console.log('OR HERE')
+        const newVote = transactionalEntityManager.create(Upvote, {
+          userId,
+          postId,
+          value: realValue
+        })
+        await transactionalEntityManager.save(newVote)
+
+        // save() cach 2
+        post.points = post.points + realValue
+        post = await transactionalEntityManager.save(post)
+      }
 
       return {
         code: 200,
