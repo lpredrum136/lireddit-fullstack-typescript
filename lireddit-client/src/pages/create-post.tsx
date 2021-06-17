@@ -12,7 +12,6 @@ import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import { useCheckAuth } from '../utils/useCheckAuth'
 import NextLink from 'next/link'
-import { limit } from './index'
 
 const CreatePost = () => {
   // Router Next

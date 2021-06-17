@@ -6,4 +6,5 @@ fragment postInfo on Post {
   updatedAt
   title
   textSnippet
+  points
 }

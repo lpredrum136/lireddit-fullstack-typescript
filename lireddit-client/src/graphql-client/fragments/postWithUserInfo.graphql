@@ -1,0 +1,6 @@
+fragment postWithUserInfo on Post {
+  ...postInfo
+  user {
+    ...userInfo
+  }
+}

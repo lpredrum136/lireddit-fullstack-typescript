@@ -193,8 +193,8 @@ export class PostResolver {
   @Mutation(_returns => PostMutationResponse)
   @UseMiddleware(checkAuth)
   async vote(
-    @Arg('postId') postId: number,
-    @Arg('value') value: number,
+    @Arg('postId', _type => Int) postId: number,
+    @Arg('value', _type => Int) value: number,
     @Ctx() { req, connection }: DbContext
   ): Promise<PostMutationResponse> {
     return await connection.transaction(async transactionalEntityManager => {

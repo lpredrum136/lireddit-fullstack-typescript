@@ -5,6 +5,7 @@ import Layout from '../components/Layout'
 import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { NetworkStatus } from '@apollo/client'
+import UpvoteSection from '../components/UpvoteSection'
 
 export const limit = 5 // number of posts to get from backend
 
@@ -40,13 +41,16 @@ const Index = () => {
       ) : (
         <Stack spacing={8}>
           {data?.posts.paginatedPosts.map(post => (
-            <Box key={post.id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">
-                {post.title} - {post.id}
-              </Heading>
-              <Text>posted by {post.user.username}</Text>
-              <Text mt={4}>{post.textSnippet}</Text>
-            </Box>
+            <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
+              <UpvoteSection post={post} />
+              <Box>
+                <Heading fontSize="xl">
+                  {post.title} - {post.id}
+                </Heading>
+                <Text>posted by {post.user.username}</Text>
+                <Text mt={4}>{post.textSnippet}</Text>
+              </Box>
+            </Flex>
           ))}
         </Stack>
       )}

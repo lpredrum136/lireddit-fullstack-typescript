@@ -12,7 +12,6 @@ import { onError } from '@apollo/client/link/error'
 import Router from 'next/router' // using router outside page component: https://stackoverflow.com/questions/55182529/next-js-router-push-with-state
 import { Post } from '../generated/graphql'
 // import { concatPagination } from '@apollo/client/utilities'
-import { DateTime } from 'luxon'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 

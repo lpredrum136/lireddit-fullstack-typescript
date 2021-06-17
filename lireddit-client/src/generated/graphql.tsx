@@ -96,8 +96,8 @@ export type MutationDeletePostArgs = {
 
 
 export type MutationVoteArgs = {
-  value: Scalars['Float'];
-  postId: Scalars['Float'];
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
 };
 
 
@@ -197,7 +197,7 @@ export type PostMutationResponseFragment = (
     { __typename?: 'Post' }
     & { user: (
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
+      & UserInfoFragment
     ) }
     & PostInfoFragment
   )>, errors?: Maybe<Array<(
@@ -205,6 +205,15 @@ export type PostMutationResponseFragment = (
     & RegularErrorFragment
   )>> }
   & PostMutationResponseStatusesFragment
+);
+
+export type PostWithUserInfoFragment = (
+  { __typename?: 'Post' }
+  & { user: (
+    { __typename?: 'User' }
+    & UserInfoFragment
+  ) }
+  & PostInfoFragment
 );
 
 export type RegularErrorFragment = (
@@ -301,6 +310,20 @@ export type RegisterUserMutation = (
   ) }
 );
 
+export type VoteMutationVariables = Exact<{
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
+}>;
+
+
+export type VoteMutation = (
+  { __typename?: 'Mutation' }
+  & { vote: (
+    { __typename?: 'PostMutationResponse' }
+    & PostMutationResponseFragment
+  ) }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -325,11 +348,7 @@ export type PostsQuery = (
     & Pick<PaginatedPosts, 'totalCount' | 'cursor' | 'hasMore'>
     & { paginatedPosts: Array<(
       { __typename?: 'Post' }
-      & { user: (
-        { __typename?: 'User' }
-        & UserInfoFragment
-      ) }
-      & PostInfoFragment
+      & PostWithUserInfoFragment
     )> }
   ) }
 );
@@ -350,6 +369,13 @@ export const PostInfoFragmentDoc = gql`
   updatedAt
   title
   textSnippet
+  points
+}
+    `;
+export const UserInfoFragmentDoc = gql`
+    fragment userInfo on User {
+  id
+  username
 }
     `;
 export const RegularErrorFragmentDoc = gql`
@@ -364,8 +390,7 @@ export const PostMutationResponseFragmentDoc = gql`
   post {
     ...postInfo
     user {
-      id
-      username
+      ...userInfo
     }
   }
   errors {
@@ -374,18 +399,22 @@ export const PostMutationResponseFragmentDoc = gql`
 }
     ${PostMutationResponseStatusesFragmentDoc}
 ${PostInfoFragmentDoc}
+${UserInfoFragmentDoc}
 ${RegularErrorFragmentDoc}`;
+export const PostWithUserInfoFragmentDoc = gql`
+    fragment postWithUserInfo on Post {
+  ...postInfo
+  user {
+    ...userInfo
+  }
+}
+    ${PostInfoFragmentDoc}
+${UserInfoFragmentDoc}`;
 export const UserMutationResponseStatusesFragmentDoc = gql`
     fragment userMutationResponseStatuses on UserMutationResponse {
   code
   success
   message
-}
-    `;
-export const UserInfoFragmentDoc = gql`
-    fragment userInfo on User {
-  id
-  username
 }
     `;
 export const UserMutationResponseFragmentDoc = gql`
@@ -594,6 +623,39 @@ export function useRegisterUserMutation(baseOptions?: Apollo.MutationHookOptions
 export type RegisterUserMutationHookResult = ReturnType<typeof useRegisterUserMutation>;
 export type RegisterUserMutationResult = Apollo.MutationResult<RegisterUserMutation>;
 export type RegisterUserMutationOptions = Apollo.BaseMutationOptions<RegisterUserMutation, RegisterUserMutationVariables>;
+export const VoteDocument = gql`
+    mutation Vote($value: Int!, $postId: Int!) {
+  vote(value: $value, postId: $postId) {
+    ...postMutationResponse
+  }
+}
+    ${PostMutationResponseFragmentDoc}`;
+export type VoteMutationFn = Apollo.MutationFunction<VoteMutation, VoteMutationVariables>;
+
+/**
+ * __useVoteMutation__
+ *
+ * To run a mutation, you first call `useVoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [voteMutation, { data, loading, error }] = useVoteMutation({
+ *   variables: {
+ *      value: // value for 'value'
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMutation, VoteMutationVariables>) {
+        return Apollo.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument, baseOptions);
+      }
+export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
+export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
+export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -633,15 +695,11 @@ export const PostsDocument = gql`
     cursor
     hasMore
     paginatedPosts {
-      ...postInfo
-      user {
-        ...userInfo
-      }
+      ...postWithUserInfo
     }
   }
 }
-    ${PostInfoFragmentDoc}
-${UserInfoFragmentDoc}`;
+    ${PostWithUserInfoFragmentDoc}`;
 
 /**
  * __usePostsQuery__
