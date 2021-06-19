@@ -38,7 +38,7 @@ const UpvoteSection = ({ post }: UpvoteSectionProps) => {
           isLoading={loading && loadingState === 'upvote-loading'}
           colorScheme={post.voteStatus === 1 ? 'green' : undefined}
         />
-        {post.points} - {post.voteStatus}
+        {post.points}
         <IconButton
           icon={<ChevronDownIcon />}
           aria-label="downvote"

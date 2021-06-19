@@ -64,7 +64,7 @@ export class PostResolver {
   @Query(_returns => PaginatedPosts) // _ is to bypass unused variable error
   async posts(
     @Arg('limit', _type => Int) limit: number,
-    @Ctx() { /* em */ connection, req }: DbContext,
+    @Ctx() { /* em */ connection }: DbContext,
     @Arg('cursor', { nullable: true }) cursor?: string
   ): Promise<PaginatedPosts> {
     // MikroORM

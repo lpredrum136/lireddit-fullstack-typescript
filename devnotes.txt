@@ -315,3 +315,4 @@ Da add xong new post
 npm i @chakra-ui/icons
 
 send cookies with ssr: https://www.rockyourcode.com/nextjs-with-apollo-ssr-cookies-and-typescript/
+npm i isomorphic-unfetch

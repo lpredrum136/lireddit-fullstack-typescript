@@ -1,6 +1,6 @@
 import { PostsDocument, usePostsQuery } from '../generated/graphql'
 import { addApolloState, initialiseApollo } from '../lib/apolloClient'
-import { GetStaticProps } from 'next'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import Layout from '../components/Layout'
 import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
@@ -71,8 +71,11 @@ const Index = () => {
   )
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  const apolloClient = initialiseApollo()
+// originally used getStaticProps but changed to getServerSideProps for context.req.headers for this request to send the cookie
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const apolloClient = initialiseApollo({ headers: context.req.headers })
   await apolloClient.query({ query: PostsDocument, variables: { limit } })
 
   return addApolloState(apolloClient, { props: {} })
