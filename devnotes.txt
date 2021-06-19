@@ -313,3 +313,5 @@ Ben dung them 1 table moi cho upvotes nhung dang tu nghien cuu
 Da add xong new post 
 
 npm i @chakra-ui/icons
+
+send cookies with ssr: https://www.rockyourcode.com/nextjs-with-apollo-ssr-cookies-and-typescript/

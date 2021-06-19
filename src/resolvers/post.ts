@@ -51,10 +51,20 @@ export class PostResolver {
     return await User.findOne(rootPostResult.userId)
   }
 
+  @FieldResolver()
+  async voteStatus(@Root() root: Post, @Ctx() { req }: DbContext) {
+    const existingVote = await Upvote.findOne({
+      postId: root.id,
+      userId: req.session.userId
+    })
+
+    return existingVote ? existingVote.value : 0
+  }
+
   @Query(_returns => PaginatedPosts) // _ is to bypass unused variable error
   async posts(
     @Arg('limit', _type => Int) limit: number,
-    @Ctx() { /* em */ connection }: DbContext,
+    @Ctx() { /* em */ connection, req }: DbContext,
     @Arg('cursor', { nullable: true }) cursor?: string
   ): Promise<PaginatedPosts> {
     // MikroORM
@@ -123,6 +133,7 @@ export class PostResolver {
     // const post = em.create(Post, { title })
     // await em.persistAndFlush(post)
     // return post
+
     const newPost = Post.create({ title, text, userId: req.session.userId })
     await newPost.save()
 
@@ -216,7 +227,6 @@ export class PostResolver {
       // change from upvote to downvote or vice versa
 
       if (existingVote && existingVote.value !== realValue) {
-        console.log('HERE')
         // update value 1 to -1 and vice versa
         await transactionalEntityManager.save(Upvote, {
           ...existingVote,
@@ -232,7 +242,6 @@ export class PostResolver {
 
       // never voted before
       if (!existingVote) {
-        console.log('OR HERE')
         const newVote = transactionalEntityManager.create(Upvote, {
           userId,
           postId,

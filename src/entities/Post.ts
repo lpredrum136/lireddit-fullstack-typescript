@@ -9,7 +9,7 @@ import {
   ManyToOne,
   OneToMany
 } from 'typeorm'
-import { Field, ID, ObjectType } from 'type-graphql'
+import { Field, ID, Int, ObjectType } from 'type-graphql'
 import { User } from './User'
 import { Upvote } from './Upvote'
 
@@ -44,6 +44,9 @@ export class Post extends BaseEntity {
 
   @OneToMany(_to => Upvote, upvote => upvote.post)
   upvotes: Upvote[]
+
+  @Field(() => Int)
+  voteStatus!: number
 
   @Field()
   // @Property() // mikroORM style

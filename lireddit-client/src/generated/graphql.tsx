@@ -51,6 +51,7 @@ export type Post = {
   points: Scalars['Float'];
   userId?: Maybe<Scalars['Float']>;
   user: User;
+  voteStatus: Scalars['Int'];
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   textSnippet: Scalars['String'];
@@ -188,7 +189,7 @@ export type PostMutationResponseStatusesFragment = (
 
 export type PostInfoFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'points' | 'userId' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet'>
+  & Pick<Post, 'id' | 'points' | 'userId' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'voteStatus'>
 );
 
 export type PostMutationResponseFragment = (
@@ -370,6 +371,7 @@ export const PostInfoFragmentDoc = gql`
   title
   textSnippet
   points
+  voteStatus
 }
     `;
 export const UserInfoFragmentDoc = gql`

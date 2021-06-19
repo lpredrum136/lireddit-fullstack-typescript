@@ -7,4 +7,5 @@ fragment postInfo on Post {
   title
   textSnippet
   points
+  voteStatus
 }
