@@ -38,7 +38,9 @@ export class Post extends BaseEntity {
   @Column()
   userId: number
 
-  @Field() // grab real user when resolver for this runs
+  @Field() // grab real user when resolver for this runs,
+  // you can do find(..., {relations: ['user']})
+  // or setup FieldResolver for this Post type like I already did
   @ManyToOne(() => User, user => user.posts)
   user: User
 
