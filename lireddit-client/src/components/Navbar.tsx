@@ -1,4 +1,4 @@
-import { Box, Flex, Link, Button } from '@chakra-ui/react'
+import { Box, Flex, Link, Button, Heading } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import {
   MeDocument,
@@ -67,7 +67,10 @@ const Navbar = () => {
   // user is logged in
   else {
     body = (
-      <Flex>
+      <Flex align="center">
+        <NextLink href="/create-post">
+          <Button mr={4}>Create Post</Button>
+        </NextLink>
         <Box mr={2}>{data.me.username}</Box>
         <Button
           variant="link"
@@ -82,7 +85,14 @@ const Navbar = () => {
 
   return (
     <Flex bg="tan" p={4} ml="auto">
-      <Box ml="auto">{body}</Box>
+      <Flex maxW={800} align="center" flex={1} m="auto">
+        <NextLink href="/">
+          <Link>
+            <Heading>LiReddit</Heading>
+          </Link>
+        </NextLink>
+        <Box ml="auto">{body}</Box>
+      </Flex>
     </Flex>
   )
 }

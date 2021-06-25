@@ -1,3 +1,4 @@
+import { Box, Heading } from '@chakra-ui/react'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
@@ -13,13 +14,33 @@ import { limit } from '../index'
 const Post = () => {
   const router = useRouter()
 
-  const { data, loading } = usePostQuery({
+  const { data, loading, error } = usePostQuery({
     variables: {
       id: router.query.id as string
     }
   })
 
-  return <Layout>{loading ? 'Loading...' : data?.post?.text}</Layout>
+  if (error) return <div>{error.message}</div>
+
+  if (!data?.post)
+    return (
+      <Layout>
+        <Box>Could not find post</Box>
+      </Layout>
+    )
+
+  return (
+    <Layout>
+      {loading ? (
+        'Loading...'
+      ) : (
+        <>
+          <Heading mb={4}>{data.post.title}</Heading>
+          {data?.post?.text}
+        </>
+      )}
+    </Layout>
+  )
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {

@@ -189,11 +189,13 @@ export class PostResolver {
   @Mutation(_returns => PostMutationResponse)
   @UseMiddleware(checkAuth)
   async deletePost(
-    // @Ctx() { em }: DbContext,
+    @Ctx() { /* em */ req }: DbContext,
     @Arg('id', _type => ID) id: number
   ): Promise<PostMutationResponse> {
     // await em.nativeDelete(Post, { id })
-    await Post.delete(id)
+    await Upvote.delete({ postId: id })
+    await Post.delete({ id, userId: req.session.userId })
+
     return {
       code: 200,
       success: true,

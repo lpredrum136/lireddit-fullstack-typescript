@@ -1,10 +1,25 @@
-import { PostsDocument, usePostsQuery } from '../generated/graphql'
+import {
+  PaginatedPosts,
+  PostsDocument,
+  useDeletePostMutation,
+  usePostsQuery
+} from '../generated/graphql'
 import { addApolloState, initialiseApollo } from '../lib/apolloClient'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+import { DeleteIcon } from '@chakra-ui/icons'
 import Layout from '../components/Layout'
-import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Link,
+  Stack,
+  Text,
+  IconButton
+} from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { NetworkStatus } from '@apollo/client'
+import { NetworkStatus, Reference } from '@apollo/client'
 import UpvoteSection from '../components/UpvoteSection'
 
 export const limit = 5 // number of posts to get from backend
@@ -18,6 +33,35 @@ const Index = () => {
     notifyOnNetworkStatusChange: true
   })
 
+  const [deletePost, _] = useDeletePostMutation()
+
+  const onPostDelete = async (postId: string) => {
+    await deletePost({
+      variables: { id: postId },
+      update(cache) {
+        cache.modify({
+          fields: {
+            posts(
+              existing: Pick<
+                PaginatedPosts,
+                '__typename' | 'cursor' | 'hasMore' | 'totalCount'
+              > & { paginatedPosts: Reference[] }
+            ) {
+              const newPostsAfterDeletion = {
+                ...existing,
+                paginatedPosts: existing.paginatedPosts.filter(
+                  postRefObj => postRefObj.__ref !== `Post:${postId}`
+                )
+              }
+
+              return newPostsAfterDeletion
+            }
+          }
+        })
+      }
+    })
+  }
+
   const loadingMorePosts = networkStatus === NetworkStatus.fetchMore
 
   const loadMorePosts = () =>
@@ -28,14 +72,6 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex align="center">
-        <Heading>LiReddit</Heading>
-        <NextLink href="/create-post">
-          <Link ml="auto">Create Post</Link>
-        </NextLink>
-      </Flex>
-
-      <br />
       {loading && !loadingMorePosts ? (
         <div>loading...</div>
       ) : (
@@ -43,7 +79,7 @@ const Index = () => {
           {data?.posts.paginatedPosts.map(post => (
             <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
               <UpvoteSection post={post} />
-              <Box>
+              <Box flex={1}>
                 <NextLink href={`/post/${post.id}`}>
                   <Link>
                     <Heading fontSize="xl">
@@ -53,7 +89,16 @@ const Index = () => {
                 </NextLink>
 
                 <Text>posted by {post.user.username}</Text>
-                <Text mt={4}>{post.textSnippet}</Text>
+                <Flex align="center">
+                  <Text mt={4}>{post.textSnippet}</Text>
+                  <IconButton
+                    ml="auto"
+                    icon={<DeleteIcon />}
+                    aria-label="delete"
+                    colorScheme="red"
+                    onClick={onPostDelete.bind(this, post.id)}
+                  />
+                </Flex>
               </Box>
             </Flex>
           ))}
