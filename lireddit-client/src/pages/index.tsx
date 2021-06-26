@@ -2,11 +2,12 @@ import {
   PaginatedPosts,
   PostsDocument,
   useDeletePostMutation,
+  useMeQuery,
   usePostsQuery
 } from '../generated/graphql'
 import { addApolloState, initialiseApollo } from '../lib/apolloClient'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
-import { DeleteIcon } from '@chakra-ui/icons'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import Layout from '../components/Layout'
 import {
   Box,
@@ -32,6 +33,8 @@ const Index = () => {
     // more data
     notifyOnNetworkStatusChange: true
   })
+
+  const { data: meData } = useMeQuery()
 
   const [deletePost, _] = useDeletePostMutation()
 
@@ -89,16 +92,28 @@ const Index = () => {
                   </Link>
                 </NextLink>
 
-                <Text>posted by {post.user.username}</Text>
+                <Text>
+                  posted by {post.user.username} - {post.userId}
+                </Text>
                 <Flex align="center">
                   <Text mt={4}>{post.textSnippet}</Text>
-                  <IconButton
-                    ml="auto"
-                    icon={<DeleteIcon />}
-                    aria-label="delete"
-                    colorScheme="red"
-                    onClick={onPostDelete.bind(this, post.id)}
-                  />
+                  {meData?.me?.id === post.userId?.toString() && (
+                    <Box ml="auto">
+                      <NextLink href={`/post/edit/${post.id}`}>
+                        <IconButton
+                          icon={<EditIcon />}
+                          aria-label="edit"
+                          mr={4}
+                        />
+                      </NextLink>
+                      <IconButton
+                        icon={<DeleteIcon />}
+                        aria-label="delete"
+                        colorScheme="red"
+                        onClick={onPostDelete.bind(this, post.id)}
+                      />
+                    </Box>
+                  )}
                 </Flex>
               </Box>
             </Flex>

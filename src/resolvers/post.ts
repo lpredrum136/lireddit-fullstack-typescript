@@ -22,6 +22,7 @@ import { PaginatedPosts } from '../entities/PaginatedPosts'
 import { User } from '../entities/User'
 import { Upvote } from '../entities/Upvote'
 import { UserInputError } from 'apollo-server-errors'
+import { UpdatePostInput } from '../entities/UpdatePostInput'
 // import { sleep } from '../utils/sleep'
 
 @ObjectType({ implements: IMutationResponse })
@@ -149,8 +150,8 @@ export class PostResolver {
   @UseMiddleware(checkAuth)
   async updatePost(
     // @Ctx() { em }: DbContext,
-    @Arg('id', _type => ID) id: number,
-    @Arg('title', { nullable: true }) title?: string
+    @Arg('updatePostInput') { id, title, text }: UpdatePostInput,
+    @Ctx() { req }: DbContext
   ): Promise<PostMutationResponse> {
     // mikroORM style
     // const post = await em.findOne(Post, { id })
@@ -172,11 +173,14 @@ export class PostResolver {
         message: 'Post not found'
       }
 
-    // or cach 2. post.title = title roi await post.save()
-    if (typeof title !== 'undefined') {
-      await Post.update({ id }, { title })
-      post.title = title
-    }
+    if (post.userId !== req.session.userId)
+      return { code: 400, success: false, message: 'Unauthorised' }
+
+    // or cach 2. post.title = title roi await post.save(), cach nay tham chi hay hon
+    // vi save() tra lai cai post moi da updated
+    await Post.update({ id }, { title, text })
+    post.title = title
+    post.text = text
 
     return {
       code: 200,
@@ -209,6 +213,8 @@ export class PostResolver {
       success: true,
       message: 'Post deleted successfully'
     }
+
+    // you can also setup cascade in Upvote entity but I prefer this way
   }
 
   @Mutation(_returns => PostMutationResponse)
