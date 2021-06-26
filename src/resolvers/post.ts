@@ -193,8 +193,16 @@ export class PostResolver {
     @Arg('id', _type => ID) id: number
   ): Promise<PostMutationResponse> {
     // await em.nativeDelete(Post, { id })
+
+    const post = await Post.findOne(id)
+
+    if (!post) return { code: 400, success: false, message: 'Post not found' }
+
+    if (post.userId !== req.session.userId)
+      return { code: 400, success: false, message: 'Unauthorised' }
+
     await Upvote.delete({ postId: id })
-    await Post.delete({ id, userId: req.session.userId })
+    await Post.delete({ id })
 
     return {
       code: 200,

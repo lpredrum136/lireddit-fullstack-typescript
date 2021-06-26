@@ -38,26 +38,27 @@ const Index = () => {
   const onPostDelete = async (postId: string) => {
     await deletePost({
       variables: { id: postId },
-      update(cache) {
-        cache.modify({
-          fields: {
-            posts(
-              existing: Pick<
-                PaginatedPosts,
-                '__typename' | 'cursor' | 'hasMore' | 'totalCount'
-              > & { paginatedPosts: Reference[] }
-            ) {
-              const newPostsAfterDeletion = {
-                ...existing,
-                paginatedPosts: existing.paginatedPosts.filter(
-                  postRefObj => postRefObj.__ref !== `Post:${postId}`
-                )
-              }
+      update(cache, { data }) {
+        if (data?.deletePost.success)
+          cache.modify({
+            fields: {
+              posts(
+                existing: Pick<
+                  PaginatedPosts,
+                  '__typename' | 'cursor' | 'hasMore' | 'totalCount'
+                > & { paginatedPosts: Reference[] }
+              ) {
+                const newPostsAfterDeletion = {
+                  ...existing,
+                  paginatedPosts: existing.paginatedPosts.filter(
+                    postRefObj => postRefObj.__ref !== `Post:${postId}`
+                  )
+                }
 
-              return newPostsAfterDeletion
+                return newPostsAfterDeletion
+              }
             }
-          }
-        })
+          })
       }
     })
   }
