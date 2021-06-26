@@ -1,27 +1,12 @@
-import {
-  PaginatedPosts,
-  PostsDocument,
-  useDeletePostMutation,
-  useMeQuery,
-  usePostsQuery
-} from '../generated/graphql'
-import { addApolloState, initialiseApollo } from '../lib/apolloClient'
+import { NetworkStatus } from '@apollo/client'
+import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
-import Layout from '../components/Layout'
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Link,
-  Stack,
-  Text,
-  IconButton
-} from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { NetworkStatus, Reference } from '@apollo/client'
+import Layout from '../components/Layout'
 import UpvoteSection from '../components/UpvoteSection'
+import { PostsDocument, useMeQuery, usePostsQuery } from '../generated/graphql'
+import { addApolloState, initialiseApollo } from '../lib/apolloClient'
+import PostEditDeleteButtons from '../components/PostEditDeleteButtons'
 
 export const limit = 5 // number of posts to get from backend
 
@@ -33,38 +18,6 @@ const Index = () => {
     // more data
     notifyOnNetworkStatusChange: true
   })
-
-  const { data: meData } = useMeQuery()
-
-  const [deletePost, _] = useDeletePostMutation()
-
-  const onPostDelete = async (postId: string) => {
-    await deletePost({
-      variables: { id: postId },
-      update(cache, { data }) {
-        if (data?.deletePost.success)
-          cache.modify({
-            fields: {
-              posts(
-                existing: Pick<
-                  PaginatedPosts,
-                  '__typename' | 'cursor' | 'hasMore' | 'totalCount'
-                > & { paginatedPosts: Reference[] }
-              ) {
-                const newPostsAfterDeletion = {
-                  ...existing,
-                  paginatedPosts: existing.paginatedPosts.filter(
-                    postRefObj => postRefObj.__ref !== `Post:${postId}`
-                  )
-                }
-
-                return newPostsAfterDeletion
-              }
-            }
-          })
-      }
-    })
-  }
 
   const loadingMorePosts = networkStatus === NetworkStatus.fetchMore
 
@@ -86,34 +39,16 @@ const Index = () => {
               <Box flex={1}>
                 <NextLink href={`/post/${post.id}`}>
                   <Link>
-                    <Heading fontSize="xl">
-                      {post.title} - {post.id}
-                    </Heading>
+                    <Heading fontSize="xl">{post.title}</Heading>
                   </Link>
                 </NextLink>
 
-                <Text>
-                  posted by {post.user.username} - {post.userId}
-                </Text>
+                <Text>posted by {post.user.username}</Text>
                 <Flex align="center">
                   <Text mt={4}>{post.textSnippet}</Text>
-                  {meData?.me?.id === post.userId?.toString() && (
-                    <Box ml="auto">
-                      <NextLink href={`/post/edit/${post.id}`}>
-                        <IconButton
-                          icon={<EditIcon />}
-                          aria-label="edit"
-                          mr={4}
-                        />
-                      </NextLink>
-                      <IconButton
-                        icon={<DeleteIcon />}
-                        aria-label="delete"
-                        colorScheme="red"
-                        onClick={onPostDelete.bind(this, post.id)}
-                      />
-                    </Box>
-                  )}
+                  <Box ml="auto">
+                    <PostEditDeleteButtons id={post.id} userId={post.userId} />
+                  </Box>
                 </Flex>
               </Box>
             </Flex>
