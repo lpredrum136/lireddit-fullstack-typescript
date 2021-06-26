@@ -59,57 +59,57 @@ const CreatePost = () => {
 
           // NEW POST automatically added to cache so if we do it like above, it doesn't work
           // must identify the post, and move it to the top
-          // cache.modify({
-          //   fields: {
-          //     posts(existing, { readField }) {
-          //       console.log('EXISTING', existing)
+          cache.modify({
+            fields: {
+              posts(existing, { readField }) {
+                console.log('EXISTING', existing)
 
-          //       if (data?.createPost.success && data.createPost.post) {
-          //         const newPostRef = cache.identify(data.createPost.post)
+                if (data?.createPost.success && data.createPost.post) {
+                  const newPostRef = cache.identify(data.createPost.post)
 
-          //         console.log('NEW POST REF', newPostRef)
+                  console.log('NEW POST REF', newPostRef)
 
-          //         console.log(
-          //           'READ FIELD',
-          //           readField('title', data.createPost.post)
-          //         )
+                  // console.log(
+                  //   'READ FIELD',
+                  //   readField('title', data.createPost.post)
+                  // )
 
-          //         const newPosts = {
-          //           ...existing,
-          //           totalCount: existing.totalCount + 1,
-          //           paginatedPosts: [
-          //             data.createPost.post,
-          //             ...existing.paginatedPosts
-          //           ]
-          //         }
-
-          //         console.log('NEW POSTS', newPosts)
-
-          //         return newPosts
-          //       }
-          //     }
-          //   }
-          // })
-
-          // this doesn't work!!!
-          if (data?.createPost.success && data.createPost.post) {
-            console.log('DATA', data.createPost.post)
-            cache.writeQuery(
-              /* <PostsQuery> cannot use this because we want to have a flag*/ {
-                query: PostsDocument,
-                data: {
-                  posts: {
-                    ...postsData!.posts,
-                    paginatedPosts: data.createPost.post as Post
+                  const newPostsAfterCreation = {
+                    ...existing,
+                    totalCount: existing.totalCount + 1,
+                    paginatedPosts: [
+                      { __ref: newPostRef },
+                      ...existing.paginatedPosts
+                    ]
                   }
+
+                  console.log('NEW POSTS', newPostsAfterCreation)
+
+                  return newPostsAfterCreation
                 }
-                // this doesn't matter
-                // variables: {
-                //   limit: 5
-                // }
               }
-            )
-          }
+            }
+          })
+
+          // this works but very ugly, and you had to change in apolloClient as well
+          // if (data?.createPost.success && data.createPost.post) {
+          //   console.log('DATA', data.createPost.post)
+          //   cache.writeQuery(
+          //     /* <PostsQuery> cannot use this because we want to have a flag*/ {
+          //       query: PostsDocument,
+          //       data: {
+          //         posts: {
+          //           ...postsData!.posts,
+          //           paginatedPosts: data.createPost.post as Post
+          //         }
+          //       }
+          //       // this doesn't matter
+          //       // variables: {
+          //       //   limit: 5
+          //       // }
+          //     }
+          //   )
+          // }
 
           postsData = cache.readQuery<PostsQuery>({
             query: PostsDocument
