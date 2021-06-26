@@ -47,7 +47,7 @@ const PostEditDeleteButtons = ({ id, userId }: PostEditDeleteButtonsProps) => {
     })
   }
 
-  if (meData?.me?.id === userId?.toString()) return null
+  if (meData?.me?.id !== userId?.toString()) return null
 
   return (
     <Box>
