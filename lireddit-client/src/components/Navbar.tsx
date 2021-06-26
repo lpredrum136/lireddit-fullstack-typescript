@@ -32,8 +32,6 @@ const Navbar = () => {
   const { data, loading, error: _useMeQueryError } = useMeQuery() // neu de error khong thi se loi unused, neu chuyen thanh _error thi k duoc vi object k co property nao ten la _error
   // the nen co the doi ten: error: useMeQueryError, va neu k dung toi thi: error: _useMeQueryError
 
-  console.log('NAVBAR ME', data?.me?.id)
-
   let body = null
 
   // Do Navbar la component con cua index.tsx nen bat ki luc nao o home page, i.e. localhost:3000/, no cung se goi MeQuery len, co the kiem chung

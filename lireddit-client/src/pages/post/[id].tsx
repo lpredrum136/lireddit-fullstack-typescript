@@ -1,24 +1,17 @@
 import { Box, Heading } from '@chakra-ui/react'
 import { GetStaticPaths, GetStaticProps } from 'next'
-import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import {
   PostDocument,
   PostIdsDocument,
-  PostIdsQuery,
-  usePostQuery
+  PostIdsQuery
 } from '../../generated/graphql'
 import { addApolloState, initialiseApollo } from '../../lib/apolloClient'
+import { useGetPostFromUrl } from '../../utils/useGetPostFromUrl'
 import { limit } from '../index'
 
 const Post = () => {
-  const router = useRouter()
-
-  const { data, loading, error } = usePostQuery({
-    variables: {
-      id: router.query.id as string
-    }
-  })
+  const { data, loading, error } = useGetPostFromUrl()
 
   if (error) return <div>{error.message}</div>
 
