@@ -6,7 +6,7 @@ import { COOKIE_NAME, __prod__ } from './constants'
 // import { Post } from './entities/Post'
 // import mikroConfig from './mikro-orm.config'
 import express from 'express'
-import { ApolloServer } from 'apollo-server-express'
+import { ApolloServer, ServerRegistration } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { HelloResolver } from './resolvers/hello'
 import { PostResolver } from './resolvers/post'
@@ -45,7 +45,7 @@ const main = async () => {
   // const orm = await MikroORM.init(mikroConfig)
   // await orm.getMigrator().up() // run migrations automatically before anything else
 
-  const app = express()
+  const app = express() as ServerRegistration['app'] // fix stupid TS error with apollo-server-express bumped from 2.21.0 to 2.25.2
   app.use(
     cors({
       origin: 'http://localhost:3000',
