@@ -3,10 +3,10 @@ import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import NextLink from 'next/link'
 import Layout from '../components/Layout'
-import UpvoteSection from '../components/UpvoteSection'
-import { PostsDocument, useMeQuery, usePostsQuery } from '../generated/graphql'
-import { addApolloState, initialiseApollo } from '../lib/apolloClient'
 import PostEditDeleteButtons from '../components/PostEditDeleteButtons'
+import UpvoteSection from '../components/UpvoteSection'
+import { PostsDocument, usePostsQuery } from '../generated/graphql'
+import { addApolloState, initialiseApollo } from '../lib/apolloClient'
 
 export const limit = 5 // number of posts to get from backend
 
@@ -76,8 +76,14 @@ const Index = () => {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  console.log('CONTEXT.REQ.HEADERS', context.req.headers)
+
   const apolloClient = initialiseApollo({ headers: context.req.headers })
-  await apolloClient.query({ query: PostsDocument, variables: { limit } })
+  const data = await apolloClient.query({
+    query: PostsDocument,
+    variables: { limit }
+  })
+  console.log('QUERY DATA', data.data.posts.paginatedPosts)
 
   return addApolloState(apolloClient, { props: {} })
 }

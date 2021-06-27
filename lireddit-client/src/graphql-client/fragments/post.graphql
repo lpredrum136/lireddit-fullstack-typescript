@@ -5,6 +5,7 @@ fragment postInfo on Post {
   createdAt
   updatedAt
   title
+  text
   textSnippet
   points
   voteStatus

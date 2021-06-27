@@ -194,7 +194,7 @@ export type PostMutationResponseStatusesFragment = (
 
 export type PostInfoFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'points' | 'userId' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'voteStatus'>
+  & Pick<Post, 'id' | 'points' | 'userId' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'textSnippet' | 'voteStatus'>
 );
 
 export type PostMutationResponseFragment = (
@@ -430,6 +430,7 @@ export const PostInfoFragmentDoc = gql`
   createdAt
   updatedAt
   title
+  text
   textSnippet
   points
   voteStatus

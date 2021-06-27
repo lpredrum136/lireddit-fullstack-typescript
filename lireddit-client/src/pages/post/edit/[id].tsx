@@ -23,8 +23,8 @@ const EditPost = () => {
     await updatePost({
       variables: { updatePostInput: { ...values, id: postId } }
     })
-    router.push('/')
-    // or router.back()
+    // router.push('/')
+    router.back()
   }
 
   if (loading)

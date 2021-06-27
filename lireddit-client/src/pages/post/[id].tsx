@@ -1,6 +1,7 @@
 import { Box, Heading } from '@chakra-ui/react'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Layout from '../../components/Layout'
+import PostEditDeleteButtons from '../../components/PostEditDeleteButtons'
 import {
   PostDocument,
   PostIdsDocument,
@@ -29,7 +30,8 @@ const Post = () => {
       ) : (
         <>
           <Heading mb={4}>{data.post.title}</Heading>
-          {data?.post?.text}
+          <Box mb={4}>{data?.post?.text}</Box>
+          <PostEditDeleteButtons id={data.post.id} userId={data.post.userId} />
         </>
       )}
     </Layout>
