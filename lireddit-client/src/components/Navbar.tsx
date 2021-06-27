@@ -1,11 +1,15 @@
+import { gql } from '@apollo/client'
 import { Box, Flex, Link, Button, Heading } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import {
   MeDocument,
   MeQuery,
+  PostsDocument,
+  PostsQuery,
   useLogoutUserMutation,
   useMeQuery
 } from '../generated/graphql'
+import { Reference } from '@apollo/client'
 
 const Navbar = () => {
   const [
@@ -22,6 +26,29 @@ const Navbar = () => {
             query: MeDocument,
             data: {
               me: null
+            }
+          })
+
+          cache.modify({
+            fields: {
+              posts(existing) {
+                existing.paginatedPosts.forEach((post: Reference) => {
+                  cache.writeFragment({
+                    id: post.__ref,
+                    fragment: gql`
+                      fragment VoteStatus on Post {
+                        voteStatus
+                      }
+                    `,
+                    data: {
+                      voteStatus: 0
+                    }
+                  })
+                })
+
+                console.log('NEW EXISTING', existing)
+                return existing
+              }
             }
           })
         }

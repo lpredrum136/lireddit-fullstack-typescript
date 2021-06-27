@@ -39,7 +39,9 @@ const Index = () => {
               <Box flex={1}>
                 <NextLink href={`/post/${post.id}`}>
                   <Link>
-                    <Heading fontSize="xl">{post.title}</Heading>
+                    <Heading fontSize="xl">
+                      {post.title} - {post.id}
+                    </Heading>
                   </Link>
                 </NextLink>
 
