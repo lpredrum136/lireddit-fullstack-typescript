@@ -48,8 +48,12 @@ export class PostResolver {
 
   // return real User to user field of type Post
   @FieldResolver(_returns => User)
-  async user(@Root() rootPostResult: Post) {
-    return await User.findOne(rootPostResult.userId)
+  async user(
+    @Root() rootPostResult: Post,
+    @Ctx() { dataLoaders: { userLoader } }: DbContext
+  ) {
+    // return await User.findOne(rootPostResult.userId)
+    return await userLoader.load(rootPostResult.userId)
   }
 
   @FieldResolver()

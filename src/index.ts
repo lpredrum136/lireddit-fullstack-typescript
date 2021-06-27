@@ -25,6 +25,7 @@ import { User } from './entities/User'
 import { Post } from './entities/Post'
 import path from 'path'
 import { Upvote } from './entities/Upvote'
+import { buildDataLoaders } from './utils/dataLoaders'
 
 const main = async () => {
   const connection = await createConnection({
@@ -101,7 +102,8 @@ const main = async () => {
       // em: orm.em,
       req,
       res,
-      connection // typeorm connection to be used in resolvers
+      connection, // typeorm connection to be used in resolvers
+      dataLoaders: buildDataLoaders()
     }) // to send Post type to the resolver
   })
 
