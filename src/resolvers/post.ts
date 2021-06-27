@@ -57,8 +57,19 @@ export class PostResolver {
   }
 
   @FieldResolver()
-  async voteStatus(@Root() root: Post, @Ctx() { req }: DbContext) {
-    const existingVote = await Upvote.findOne({
+  async voteStatus(
+    @Root() root: Post,
+    @Ctx() { req, dataLoaders: { postVoteStatusLoader } }: DbContext
+  ) {
+    // const existingVote = await Upvote.findOne({
+    //   postId: root.id,
+    //   userId: req.session.userId
+    // })
+
+    // if user not logged in, return 0 right away
+    if (!req.session.userId) return 0
+
+    const existingVote = await postVoteStatusLoader.load({
       postId: root.id,
       userId: req.session.userId
     })
