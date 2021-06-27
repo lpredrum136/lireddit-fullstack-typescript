@@ -1,13 +1,14 @@
 import DataLoader from 'dataloader'
-import { In } from 'typeorm'
 import { User } from '../entities/User'
 
-const batchGetUsers = async (keys: number[]) => {
-  return await User.find({ id: In(keys) })
+const batchGetUsers = async (userIds: number[]) => {
+  const users = await User.findByIds(userIds)
+  return users
+  // return userIds.map(userId => users.find(user => user.id === userId) as User) // if you want to be extra careful
 }
 
 export const buildDataLoaders = () => ({
-  userLoader: new DataLoader<number, User>(keys =>
-    batchGetUsers(keys as number[])
+  userLoader: new DataLoader<number, User>(userIds =>
+    batchGetUsers(userIds as number[])
   )
 })

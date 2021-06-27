@@ -1,9 +1,8 @@
 // import { EntityManager, IDatabaseDriver, Connection } from '@mikro-orm/core'
-import DataLoader from 'dataloader'
 import { Request, Response } from 'express'
 import { Session, SessionData } from 'express-session'
 import { Connection } from 'typeorm'
-import { User } from './entities/User'
+import { buildDataLoaders } from './utils/dataLoaders'
 
 export type DbContext = {
   // em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
@@ -12,7 +11,5 @@ export type DbContext = {
   }
   res: Response
   connection: Connection
-  dataLoaders: {
-    userLoader: DataLoader<number, User>
-  }
+  dataLoaders: ReturnType<typeof buildDataLoaders>
 }
