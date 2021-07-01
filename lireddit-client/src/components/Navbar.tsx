@@ -4,12 +4,13 @@ import NextLink from 'next/link'
 import {
   MeDocument,
   MeQuery,
-  PostsDocument,
-  PostsQuery,
+  // PostsDocument,
+  // PostsQuery,
   useLogoutUserMutation,
   useMeQuery
 } from '../generated/graphql'
 import { Reference } from '@apollo/client'
+// import { initialiseApollo } from '../lib/apolloClient'
 
 const Navbar = () => {
   const [
@@ -51,6 +52,10 @@ const Navbar = () => {
               }
             }
           })
+
+          // CACH 2
+          // const apolloClient = initialiseApollo()
+          // apolloClient.resetStore()
         }
       }
     })

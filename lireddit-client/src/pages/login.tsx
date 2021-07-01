@@ -9,10 +9,12 @@ import {
   // UserInfoFragmentDoc,
   MeDocument,
   MeQuery
+  // PostsDocument
 } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
+import { initialiseApollo } from '../lib/apolloClient'
 
 // import { login } from '../graphql-client/mutations/mutations' // old, without graphql codegen
 // import { useMutation } from '@apollo/client' // old, without graphql codegen
@@ -69,7 +71,7 @@ const Login = () => {
         }) // buoc nay trong truong hop nay thuc ra khong can vi co thay doi cai "me" nay dau. Nhung no la cai suon` cho nhieu truong hop khac.
         // meData here is {me: {id, username}}
 
-        console.log(meData)
+        console.log('MEDATA', meData)
 
         if (data?.login.success) {
           cache.writeQuery<MeQuery>({
@@ -95,6 +97,16 @@ const Login = () => {
 
       setErrors(toErrorMap(response.data.login.errors))
     } else if (response.data?.login.user) {
+      // Otherwise it will just fetch from cache, and voteStatus will be 0 everywhere
+      // to clean store and make apollo request again to the graphql server and have updated data on posts.
+      // you can test by:
+      //  - comment these lines
+      //  - localhost:3000 -> login, so that cache is still there. After you Login, you won't see upvotes because it queried on cache
+      //  - localhost:3000/login, cache is now empty. Only now, after you Login, you will see upvotes because it has to make request to Next to get data (which was fetched with user authentication )
+      console.log('RESETTING STORE')
+      const apolloClient = initialiseApollo()
+      apolloClient.resetStore()
+
       // login successful
       router.push(
         typeof router.query.redirect === 'string' ? router.query.redirect : '/'
