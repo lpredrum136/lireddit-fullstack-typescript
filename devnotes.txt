@@ -319,7 +319,41 @@ npm i isomorphic-unfetch
 
 npm i dataloader
 
+DEPLOY
+https://cloud.digitalocean.com/droplets?i=ccf2ab
+Create droplet / marketplace / dokku / create dokku droplet \ dokku on 20.04
+basic $5 / singapore / create ssh key with putty / upload it to digitalocean (pasting the long thingy into control panel / settings / security)
+
+
 go to that ip address
 tick use virtualhost naming for apps
 finish setup
 https://dokku.com/docs~v0.21.4/deployment/application-deployment/
+
+SSH into that IP address, you will need your private key and your passphrase, username is root
+follow the link above (dokku):
+  - dokku apps:create lireddit-api
+  - sudo dokku plugin:install https://github.com/dokku/dokku-postgres.git
+  - dokku postgres:create liredditdb
+  - dokku postgres:link liredditdb lireddit-api
+
+(Ben also set up redis but since we don't use redis, we don't do it. If you do it, go to github.com/dokku/dokku-redis for more info)
+
+docker -v to check if docker is installed
+docker ps to see postgres container running
+
+create Dockerfile in source code and add 
+"build": "tsc" to your package.json backend
+co the chay thu npm run build de xem no co build k
+
+https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
+add .dockerignore
+at the end, there is https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md
+  - set env NODE_ENV=production in dockerfile
+  - set USER node in Dockerfile for security
+
+sign up at dockerhub
+Open Docker Desktop
+docker build -t lpredrum136/lireddit-server:test .
+Loi~ tsc
+
