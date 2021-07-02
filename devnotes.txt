@@ -318,3 +318,8 @@ send cookies with ssr: https://www.rockyourcode.com/nextjs-with-apollo-ssr-cooki
 npm i isomorphic-unfetch
 
 npm i dataloader
+
+go to that ip address
+tick use virtualhost naming for apps
+finish setup
+https://dokku.com/docs~v0.21.4/deployment/application-deployment/
