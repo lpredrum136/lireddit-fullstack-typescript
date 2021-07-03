@@ -3,7 +3,6 @@ import { Formik, Form, FormikHelpers } from 'formik'
 import InputField from '../components/InputField'
 import {
   CreatePostInput,
-  Post,
   PostsDocument,
   PostsQuery,
   useCreatePostMutation
@@ -61,7 +60,7 @@ const CreatePost = () => {
           // must identify the post, and move it to the top
           cache.modify({
             fields: {
-              posts(existing, { readField }) {
+              posts(existing, { readField: _readField }) {
                 console.log('EXISTING', existing)
 
                 if (data?.createPost.success && data.createPost.post) {
