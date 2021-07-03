@@ -353,7 +353,112 @@ at the end, there is https://github.com/nodejs/docker-node/blob/main/docs/BestPr
   - set USER node in Dockerfile for security
 
 sign up at dockerhub
+docker login if you need
+
 Open Docker Desktop
 docker build -t lpredrum136/lireddit-server:test .
 Loi~ tsc
+docker images hoac docker desktop de check image da build
 
+thay doi chut trong .env de tao DB_URL luon k can username password nua
+
+Neu gap loi cookie domain thi
+  cookie: {
+    ...
+    domain: __prod__ ? '.henrywebdev.site' : undefined
+  }
+
+comment out up() part in file FakePosts trong migrations
+
+tao db lireddit-for-migrations voi pgAdmin4 de lay migrations later
+
+tao migrations khoi dau:
+  - npx typeorm migration:generate -n Initialise (Ben k tao duoc file nay vi k co ormconfig.json nhung chung ta lai tao duoc) 
+        => nhung ma file trang, k co gi :)))) failed :)))
+  - https://typeorm.io/#/
+    https://typeorm.io/#/using-ormconfig
+    https://typeorm.io/#/migrations
+
+tao file ormconfig.json
+now you can npx typeorm migration:generate -n Initialise, tao ra file migrations de thiet lap db
+uncomment await connection.runMigrations() for app to run migrations on start
+    
+We've made a lot of changes, so let's build new docker image
+docker build -t lpredrum136/lireddit-server:1.0 .
+docker push lpredrum136/lireddit-server:1.0
+
+docker image tag deployment, deprecated but since we are using 0.21, it's still fine
+https://dokku.com/docs/deployment/methods/images/#image-workflows
+  docker pull lpredrum136/lireddit-server:1.0
+  docker tag lpredrum136/lireddit-server:1.0 dokku/lireddit-api:latest
+  dokku tags:deploy lireddit-api latest
+  chinh lai: boi vi dokku da ta liredditdb, va no su dung default password postgres
+    .env.production
+      DB_URL=postgresql://postgres:postgres@localhost:5432/liredditdb
+      DB_USERNAME=postgres
+      DB_PASSWORD=le***
+      SESSION_DB_USERNAME=lp***
+      SESSION_DB_PASSWORD=le***
+      SESSION_SECRET=***
+      CORS_ORIGIN=http://localhost:3000
+    ormconfig.json
+      {
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "postgres",
+        "password": "postgres",
+        "database": "liredditdb",
+        "entities": ["dist/entities/*.js"],
+        "migrations": ["dist/migrations/*.js"]
+      }
+
+van k connect duoc db 
+thu  dokku postgres:info liredditdb
+roi chinh lai env.production va ormconfig.json
+ok now it works
+  DB_URL=postgres://postgres:passwordfromdokku@hostfromdokku:5432/liredditdb
+  DB_USERNAME=
+  DB_PASSWORD=
+  SESSION_DB_USERNAME=
+  SESSION_DB_PASSWORD=
+  SESSION_SECRET=
+  CORS_ORIGIN=http://localhost:3000
+
+  {
+    "type": "postgres",
+    "host": "host from dokku",
+    "port": 5432,
+    "username": "postgres",
+    "password": "password from dokku",
+    "database": "liredditdb",
+    "entities": ["dist/entities/*.js"],
+    "migrations": ["dist/migrations/*.js"]
+  }
+
+go to GoDaddy, go to DNS management, create a new record
+https://dcc.godaddy.com/manage/henrywebdev.site/dns
+A record - lireddit-api (dokku app) - points to 165.22.58.187 - 
+
+go to https://www.whatsmydns.net/#A/lireddit-api.henrywebdev.site to check propagation
+nhung neu vao lireddit-api.henrywebdev.site van k load duoc nhung co ve la no dang redirect toi https nen cu lay TLS xem sao da
+https://github.com/dokku/dokku-letsencrypt for TLS
+  sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
+  dokku letsencrypt:enable lireddit-api
+  set email theo huong dan
+  dokku config:set --no-restart lireddit-api DOKKU_LETSENCRYPT_EMAIL=nguyenhai1591@gmail.com
+  chay lai letsencrypt
+  error:  Cannot issue for "lireddit-api.lireddit-server": Domain name does not end with a valid public suffix (TLD)
+  chay dokku domains:report de kiem tra
+  dokku domains:remove-global lireddit-server
+  dokku domains:add-global henrywebdev.site
+  chay dokku domains:report de kiem tra
+
+  dokku domains:remove lireddit-api lireddit-api.lireddit-server
+  dokku domains:add lireddit-api lireddit-api.henrywebdev.site
+
+  dokku proxy:ports lireddit-api se thay 8080, trong khi chung ta can 80
+  chay lai:  dokku letsencrypt:enable lireddit-api
+  now it works
+
+visit lireddit-api.henrywebdev.site se thay cannot GET / => success, with the lock

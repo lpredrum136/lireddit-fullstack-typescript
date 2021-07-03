@@ -30,16 +30,21 @@ import { buildDataLoaders } from './utils/dataLoaders'
 const main = async () => {
   const connection = await createConnection({
     type: 'postgres',
-    database: 'lireddit2',
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
+
+    ...(__prod__
+      ? { url: process.env.DB_URL }
+      : {
+          database: 'lireddit2',
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD
+        }),
     logging: true,
-    synchronize: true, // tao db ngay tu khi khoi dong
+    ...(__prod__ ? {} : { synchronize: true }), // tao db ngay tu khi khoi dong, only in dev, comment out in prod
     entities: [Post, User, Upvote],
     migrations: [path.join(__dirname, '/migrations/*')]
   })
 
-  // await connection.runMigrations() // this was run once to insert 100 rows in post table
+  if (__prod__) await connection.runMigrations() // this was run once to insert 100 rows in post table
 
   // sendEmail('lpredrum136@gmail.com', 'hi henry') // after you send this, get the console log username and password and hardcode it in sendEmail.ts
 
@@ -49,7 +54,7 @@ const main = async () => {
   const app = express() as ServerRegistration['app'] // fix stupid TS error with apollo-server-express bumped from 2.21.0 to 2.25.2
   app.use(
     cors({
-      origin: 'http://localhost:3000',
+      origin: process.env.CORS_ORIGIN,
       credentials: true
     })
   )
@@ -76,6 +81,8 @@ const main = async () => {
     mongooseConnection: mongoose.connection
   })
 
+  app.set('proxy', 1) // for prod
+
   app.use(
     session({
       name: COOKIE_NAME,
@@ -84,7 +91,8 @@ const main = async () => {
         maxAge: 1000 * 60 * 60, // one hour
         httpOnly: true, // Good practice, JS front end cannot access the cookie
         secure: __prod__, // cookie only works in https
-        sameSite: 'lax' // protection against CSRF
+        sameSite: 'lax', // protection against CSRF,
+        domain: __prod__ ? '.henrywebdev.site' : undefined // for prod
       },
       secret: process.env.SESSION_SECRET!, //a
       saveUninitialized: false, // so you don't save empty sessions, right from the start, when you haven't done anything
@@ -116,7 +124,9 @@ const main = async () => {
   //   res.send('hello')
   // })
 
-  app.listen(4000, () => {
+  const PORT = process.env.PORT || 4000
+
+  app.listen(PORT, () => {
     console.log(
       `Server started on port 4000. Apollo Server at localhost:4000${apolloServer.graphqlPath}`
     )

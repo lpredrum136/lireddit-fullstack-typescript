@@ -1,0 +1,10 @@
+{
+  "type": "postgres",
+  "host": "dokku-postgres-liredditdb",
+  "port": 5432,
+  "username": "postgres",
+  "password": "password-from-dokku-when-deploy",
+  "database": "liredditdb",
+  "entities": ["dist/entities/*.js"],
+  "migrations": ["dist/migrations/*.js"]
+}

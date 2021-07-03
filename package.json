@@ -4,7 +4,7 @@
   "description": "reddit full stack replicate",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "start": "node dist/index.js",
     "server": "nodemon dist/index.js",
     "startts": "ts-node src/index.ts",
