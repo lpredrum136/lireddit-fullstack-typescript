@@ -42,7 +42,8 @@ const createApolloClient = (headers: IncomingHttpHeaders | null = null) => {
   }
 
   const httpLink = new HttpLink({
-    uri: 'http://localhost:4000/graphql',
+    // uri: 'http://localhost:4000/graphql',
+    uri: process.env.NEXT_PUBLIC_API_URL,
     credentials: 'include',
     fetch: enhancedFetch
   })

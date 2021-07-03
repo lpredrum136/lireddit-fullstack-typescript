@@ -462,3 +462,8 @@ https://github.com/dokku/dokku-letsencrypt for TLS
   now it works
 
 visit lireddit-api.henrywebdev.site se thay cannot GET / => success, with the lock
+
+DEPLOY FRONT END 
+signup at vercel
+link to github
+select repo
