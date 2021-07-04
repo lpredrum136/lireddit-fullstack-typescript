@@ -41,9 +41,14 @@ const createApolloClient = (headers: IncomingHttpHeaders | null = null) => {
     })
   }
 
+  console.log('PROCESS>ENV>NODE', process.env.NODE_ENV)
+
   const httpLink = new HttpLink({
     // uri: 'http://localhost:4000/graphql',
-    uri: process.env.NEXT_PUBLIC_API_URL,
+    uri:
+      process.env.NODE_ENV === 'production'
+        ? process.env.NEXT_PUBLIC_API_URL // this will be set in vercel UI instead of put into .env.local
+        : process.env.NEXT_PUBLIC_API_URL_DEV,
     credentials: 'include',
     fetch: enhancedFetch
   })

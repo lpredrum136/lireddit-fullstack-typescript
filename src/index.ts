@@ -32,11 +32,11 @@ const main = async () => {
     type: 'postgres',
 
     ...(__prod__
-      ? { url: process.env.DB_URL }
+      ? { url: process.env.DB_URL_PROD }
       : {
           database: 'lireddit2',
-          username: process.env.DB_USERNAME,
-          password: process.env.DB_PASSWORD
+          username: process.env.DB_USERNAME_DEV,
+          password: process.env.DB_PASSWORD_DEV
         }),
     logging: true,
     ...(__prod__ ? {} : { synchronize: true }), // tao db ngay tu khi khoi dong, only in dev, comment out in prod
@@ -54,14 +54,16 @@ const main = async () => {
   const app = express() as ServerRegistration['app'] // fix stupid TS error with apollo-server-express bumped from 2.21.0 to 2.25.2
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN,
+      origin: __prod__
+        ? process.env.CORS_ORIGIN_PROD
+        : process.env.CORS_ORIGIN_DEV,
       credentials: true
     })
   )
 
   // MongoDB normal connection
   await mongoose.connect(
-    `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`,
+    `mongodb+srv://${process.env.SESSION_DB_USERNAME_DEV_PROD}:${process.env.SESSION_DB_PASSWORD_DEV_PROD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`,
     {
       useCreateIndex: true,
       useNewUrlParser: true,
@@ -76,12 +78,12 @@ const main = async () => {
   const mongoStore = connectMongo(session)
   const sessionStore = new mongoStore({
     // this is before forgot password work. Since we use mongodb normally in forgot password work, we can reuse mongoose connection
-    // url: `mongodb+srv://${process.env.SESSION_DB_USERNAME}:${process.env.SESSION_DB_PASSWORD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
+    // url: `mongodb+srv://${process.env.SESSION_DB_USERNAME_DEV_PROD}:${process.env.SESSION_DB_PASSWORD_DEV_PROD}@lireddit.o1u6x.mongodb.net/lireddit?retryWrites=true&w=majority`
 
     mongooseConnection: mongoose.connection
   })
 
-  app.set('proxy', 1) // for prod
+  app.set('trust proxy', 1) // for prod
 
   app.use(
     session({
@@ -94,7 +96,7 @@ const main = async () => {
         sameSite: 'lax', // protection against CSRF,
         domain: __prod__ ? '.henrywebdev.site' : undefined // for prod
       },
-      secret: process.env.SESSION_SECRET!, //a
+      secret: process.env.SESSION_SECRET_DEV_PROD!, //a
       saveUninitialized: false, // so you don't save empty sessions, right from the start, when you haven't done anything
       resave: false
     })

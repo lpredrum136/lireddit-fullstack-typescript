@@ -16,7 +16,7 @@ const mikroConfig = {
   dbName: 'lireddit',
   type: 'postgresql',
   // user: 'postgres',
-  password: process.env.DB_PASSWORD,
+  password: process.env.DB_PASSWORD_DEV,
   // port: 11874, // see it if you open pgAdmin
   debug: !__prod__
 } as Parameters<typeof MikroORM.init>[0]
